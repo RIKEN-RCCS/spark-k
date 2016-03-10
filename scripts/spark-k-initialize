@@ -1,0 +1,106 @@
+#!/bin/sh
+
+#
+# Spark on K intialize script
+#
+
+
+#
+# K Job system forcibly exports POSIXY_CORRECT, so unset it.
+#
+unset POSIXLY_CORRECT
+
+. /work/system/Env_base 1> /dev/null 2>&1
+
+hostname=`hostname`
+COMMON_DIR=`(cd ..; pwd)`
+
+mkdir ${COMMON_DIR}/conf
+cat << EOS > ${COMMON_DIR}/conf/spark-env.sh
+. /work/system/Env_base 1> /dev/null 2>&1
+EOS
+
+if [ -d /opt/spark ]; then
+  SPARK_HOME=/opt/spark
+else if [ -f ./spark-1.6.0-bin-custom-spark.tgz ]; then
+  # Spark がインストールされていないため、rank 0 のノードに tar ボールが置かれている想定
+  tar zxf spark-1.6.0-bin-custom-spark.tgz
+  mv ./spark-1.6.0-bin-custom-spark ../spark-1.6.0-bin-custom-spark
+  SPARK_HOME=`pwd`/../spark-1.6.0-bin-custom-spark
+  SPARK_HOME=`(cd ${SPARK_HOME}; pwd)`
+else
+  # Expects spark-submit is in PATH
+  spark_sumit=`which spark-submit 2> /dev/null`
+  if [ $? -eq 0 ]; then
+    dir=`dirname $spark_sumit`
+    SPARK_HOME=`cd $dir; ..`
+  fi
+fi; fi;
+
+if [ -z "$SPARK_HOME" ]; then
+  echo "Spark doesn't exists"
+  exit 1
+fi
+export SPARK_HOME
+export JAVA_HOME=/opt/klocal/openjdk7u45
+export PATH=${JAVA_HOME}/bin:$PATH
+export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar
+
+export COMMON_DIR
+export MASTER=spark://${hostname}:7077
+export SPARK_MASTER=${MASTER}
+
+cat << EOF >../start-slave.sh
+#!/usr/bin/env bash
+
+unset POSIXLY_CORRECT
+
+rankdir=\`pwd\`
+
+. /work/system/Env_base 1> /dev/null 2>&1
+
+export SPARK_HOME=${SPARK_HOME}
+export JAVA_HOME=${JAVA_HOME}
+export PATH=${JAVA_HOME}/bin:$PATH
+export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar
+
+# use the rank directory as a local directory
+SPARK_CONF_DIR=${COMMON_DIR}/conf \
+SPARK_LOCAL_DIRS=\${rankdir}/localdir \
+SPARK_LOG_DIR=\${rankdir}/logs \
+SPARK_WORKER_DIR=\${rankdir}/work \
+SPARK_PID_DIR=\${rankdir}/pids \
+${SPARK_HOME}/sbin/start-slave.sh spark://${hostname}:7077
+EOF
+
+cat << EOF >../stop-slave.sh
+#!/usr/bin/env bash
+
+unset POSIXLY_CORRECT
+
+rankdir=\`pwd\`
+
+. /work/system/Env_base 1> /dev/null 2>&1
+
+export SPARK_HOME=${SPARK_HOME}
+export JAVA_HOME=${JAVA_HOME}
+export PATH=${JAVA_HOME}/bin:$PATH
+export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar
+
+SPARK_CONF_DIR=${COMMON_DIR}/conf \
+SPARK_LOCAL_DIRS=\${rankdir}/localdir \
+SPARK_LOG_DIR=\${rankdir}/logs \
+SPARK_WORKER_DIR=\${rankdir}/work \
+SPARK_PID_DIR=\${rankdir}/pids \
+${SPARK_HOME}/sbin/stop-slave.sh
+EOF
+
+rankdir=`pwd`
+SPARK_CONF_DIR=${COMMON_DIR}/conf \
+SPARK_LOCAL_DIRS=${rankdir}/localdir \
+SPARK_WORKER_DIR=${rankdir}/work \
+SPARK_LOG_DIR=${rankdir}/logs \
+SPARK_PID_DIR=${rankdir}/pids \
+${SPARK_HOME}/sbin/start-master.sh
+
+mpiexec /work/system/bin/msh /bin/bash ${COMMON_DIR}/start-slave.sh

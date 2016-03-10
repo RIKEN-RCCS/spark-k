@@ -1,0 +1,6 @@
+*.local
+
+#
+# For python
+#
+*.pyc

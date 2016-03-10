@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-. `which kei-spark-initialize`
+. `which spark-k-initialize`
 
 $@
 
-. `which kei-spark-finalize`
+. `which park-k-finalize`
 

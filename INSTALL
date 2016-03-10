@@ -2,19 +2,16 @@
 
 ## Requsite softwares
 
- - python2.7
+ - python2.6
 
 ## INSTALL
 
 To install this packages, execute a following command.
 
- $ python setup.py build
  $ sudo python setup.py install
 
 This command installs:
 
- - A library (egg file) into
-   `/usr/lib/pythonX.Y/site-packages/lgpcli-1.0.0-py2.7.egg`
  - Scripts into `/usr/bin/`
 
 To configure install path, use following commands.
@@ -28,50 +25,19 @@ To configure install path, use following commands.
 For example:
 
  $ python setup.py build
- $ mkdir -p ./tmp/lib/python2.7/site-packages/
- $ PYTHONPATH=./tmp/lib/python2.7/site-packages/ python setup.py install \
+ $ mkdir -p ./tmp/lib/python2.6/site-packages/
+ $ PYTHONPATH=./tmp/lib/python2.6/site-packages/ python setup.py install \
    --prefix=./tmp --install-scripts=./tmp/local/bin
 
-This commands install a library into ./tmp/lib/python2.7/site-packages and
+This commands install a library into ./tmp/lib/python2.6/site-packages and
 scripts into ./tmp/local/bin.
 
 In this case, the enviroment variables need to be configured.
 Please add the following line into your .bashrc.
 
-  export PYTHONPATH=${PYTHONPATH}:${WORK}/tmp/lib/python2.7/site-packages
-  export PATH=${PATH}:${WORK}/tmp/local/bin
+  $ export PYTHONPATH=${PYTHONPATH}:${WORK}/tmp/lib/python2.6/site-packages
+  $ export PATH=${PATH}:${WORK}/tmp/local/bin
 
 * ${WORK} must specifiy the directory in that you executed the above exapmle.
 
 See 'python setup.py install --help' to more information.
-
-# TEST
-
-## Required packages for test
-
-### For pip
-
-Required pacakges are written in `devel-requirements.txt`.
-
-To install required packages, execute a following command.
-
- $ sudo aptitude install python-pip
- $ sudo pip install -r devel-requirements.txt
-
-### For Ubuntu
-
-Please install the following packages:
-
- - python-pytest
- - python-mock
-
-## Run tests
-
-To execute unit tests:
-
- $ ./runtests.sh
-
-Or
-
- $ python setup.py test
-

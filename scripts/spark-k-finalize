@@ -11,6 +11,10 @@ unset POSIXLY_CORRECT
 
 if [ -d /opt/spark ]; then
   SPARK_HOME=/opt/spark
+else if [ -d /opt/local/spark ]; then
+  SPARK_HOME=/opt/local/spark
+else if [ -d /opt/aics/spark ]; then
+  SPARK_HOME=/opt/aics/spark
 else if [ -f ./spark-1.6.0-bin-custom-spark.tgz ]; then
   # Spark がインストールされていないため、rank 0 のノードに tar ボールが置かれている想定
   tar zxf spark-1.6.0-bin-custom-spark.tgz
@@ -24,7 +28,7 @@ else
     dir=`dirname $spark_sumit`
     SPARK_HOME=`cd $dir; ..`
   fi
-fi; fi;
+fi; fi; fi; fi
 
 if [ -z "$SPARK_HOME" ]; then
   echo "Spark doesn't exists"

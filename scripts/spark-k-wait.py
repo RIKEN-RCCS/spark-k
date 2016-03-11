@@ -42,7 +42,7 @@ class WaitCommand():
             cls.__parser.error('port is too small')
 
         if args.port > PORT_MAX:
-            cls.__parser.error('port is too large')
+            cls.__parser.error('port is too big')
 
         if args.retrymax < 0:
             cls.__parser.error('retrymax should be positive')

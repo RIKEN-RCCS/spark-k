@@ -23,7 +23,7 @@ class WaitCommand():
                             action='store_true',
                             help=argparse.SUPPRESS)
 
-    __parser.add_argument('--host', default='localhost')
+    __parser.add_argument('--host', type=str, default='localhost')
 
     __parser.add_argument('--port', type=int, default=8080)
 
@@ -42,7 +42,7 @@ class WaitCommand():
             cls.__parser.error('port is too small')
 
         if args.port > PORT_MAX:
-            cls.__parser.error('port is too big')
+            cls.__parser.error('port is too large')
 
         if args.retrymax < 0:
             cls.__parser.error('retrymax should be positive')

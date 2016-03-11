@@ -46,6 +46,8 @@ export JAVA_HOME=/opt/klocal/openjdk7u45
 export PATH=${JAVA_HOME}/bin:$PATH
 export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar
 
+export RHOME=/opt/aics/R
+
 export COMMON_DIR
 export MASTER=spark://${hostname}:7077
 export SPARK_MASTER=${MASTER}
@@ -63,6 +65,9 @@ export SPARK_HOME=${SPARK_HOME}
 export JAVA_HOME=${JAVA_HOME}
 export PATH=${JAVA_HOME}/bin:$PATH
 export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar
+
+export RHOME=${RHOME}
+export PATH=${RHOME}/bin:$PATH
 
 # use the rank directory as a local directory
 SPARK_CONF_DIR=${COMMON_DIR}/conf \
@@ -86,6 +91,9 @@ export SPARK_HOME=${SPARK_HOME}
 export JAVA_HOME=${JAVA_HOME}
 export PATH=${JAVA_HOME}/bin:$PATH
 export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar
+
+export RHOME=${RHOME}
+export PATH=${RHOME}/bin:$PATH
 
 SPARK_CONF_DIR=${COMMON_DIR}/conf \
 SPARK_LOCAL_DIRS=\${rankdir}/localdir \

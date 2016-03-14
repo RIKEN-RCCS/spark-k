@@ -12,8 +12,19 @@ unset POSIXLY_CORRECT
 
 . /work/system/Env_base 1> /dev/null 2>&1
 
-hostname=`hostname`
+mpiexec /work/system/bin/msh hostname > k_nodes 2> /dev/null
+export NODES_NUBMER=`wc -l k_nodes 2> /dev/null`
+
+if [ "${NODES_NUBMER}" -gt 1 -a ! -z "${USE_DRIVER_NODE}" ]; then
+    K_MASTER_NODE="`tail -n 1 k_nodes`"
+    K_DRIVER_NODE="`hotaname`"
+else
+    K_MASTER_NODE="`hostname`"
+    K_DRIVER_NODE=""
+fi
+
 COMMON_DIR=`(cd ..; pwd)`
+SPARK_ARCHIVE=spark-1.6.0-bin-custom-spark
 
 mkdir ${COMMON_DIR}/conf
 cat << EOS > ${COMMON_DIR}/conf/spark-env.sh
@@ -28,9 +39,9 @@ else if [ -d /opt/aics/spark ]; then
   SPARK_HOME=/opt/aics/spark
 else if [ -f ./spark-1.6.0-bin-custom-spark.tgz ]; then
   # Expects Spark tarball exists
-  tar zxf spark-1.6.0-bin-custom-spark.tgz
-  mv ./spark-1.6.0-bin-custom-spark ../spark-1.6.0-bin-custom-spark
-  SPARK_HOME=`pwd`/../spark-1.6.0-bin-custom-spark
+  tar zxf ${SPARK_ARCHIVE}.tgz
+  mv ${SPARK_ARCHIVE} ../
+  SPARK_HOME=`pwd`/../${SPARK_ARCHIVE}
   SPARK_HOME=`(cd ${SPARK_HOME}; pwd)`
 else
   # Expects spark-submit is in PATH
@@ -45,6 +56,7 @@ if [ -z "$SPARK_HOME" ]; then
   echo "Spark doesn't exists"
   exit 1
 fi
+
 export SPARK_HOME
 export JAVA_HOME=/opt/klocal/openjdk7u45
 export PATH=${JAVA_HOME}/bin:$PATH
@@ -58,14 +70,24 @@ export PATH=${PYTHON_HOME}/bin:${PATH}
 export LD_LIBRARY_PATH=${PYTHON_HOME}/lib:${LD_LIBRARY_PATH}
 
 export COMMON_DIR
-export MASTER=spark://${hostname}:7077
-export SPARK_MASTER=${MASTER}
-
+export SPARK_MASTER_NODE=spark://${K_MASTER_NODE}:7077
 
 cat << EOF >../start-slave.sh
 #!/usr/bin/env bash
 
 unset POSIXLY_CORRECT
+
+if [ \`hostname\` == ${K_DRIVER_NODE} ]
+    if [ ${NODES_NUBMER} -gt 1 ]; then
+        exit 0
+    fi
+else if [ \`hostname\` == ${K_MASTER_NODE} ]; then
+    if [ ! -z "${K_DRIVER_NODE} -a ${NODES_NUBMER} -gt 2 ]; then
+        exit 0
+    else if [ -z "${K_DRIVER_NODE} -a ${NODES_NUBMER} -gt 1 ]; then
+        exit 0
+    fi; fi
+fi; fi
 
 rankdir=\`pwd\`
 
@@ -89,13 +111,25 @@ SPARK_LOCAL_DIRS=\${rankdir}/localdir \
 SPARK_LOG_DIR=\${rankdir}/logs \
 SPARK_WORKER_DIR=\${rankdir}/work \
 SPARK_PID_DIR=\${rankdir}/pids \
-${SPARK_HOME}/sbin/start-slave.sh spark://${hostname}:7077
+${SPARK_HOME}/sbin/start-slave.sh ${SPARK_MASTER_NODE}
 EOF
 
 cat << EOF >../stop-slave.sh
 #!/usr/bin/env bash
 
 unset POSIXLY_CORRECT
+
+if [ \`hostname\` == ${K_DRIVER_NODE} ]
+    if [ ${NODES_NUBMER} -gt 1 ]; then
+        exit 0
+    fi
+else if [ \`hostname\` == ${K_MASTER_NODE} ]; then
+    if [ ! -z "${K_DRIVER_NODE} -a ${NODES_NUBMER} -gt 2 ]; then
+        exit 0
+    else if [ -z "${K_DRIVER_NODE} -a ${NODES_NUBMER} -gt 1 ]; then
+        exit 0
+    fi; fi
+fi; fi
 
 rankdir=\`pwd\`
 
@@ -121,7 +155,18 @@ SPARK_PID_DIR=\${rankdir}/pids \
 ${SPARK_HOME}/sbin/stop-slave.sh
 EOF
 
-rankdir=`pwd`
+
+cat << EOF >../start-master.sh
+#!/usr/bin/env bash
+
+unset POSIXLY_CORRECT
+
+if [ "\`hostname\`" != "${SPARK_MASTER_NODE}" ]; then
+    exit 0
+fi
+
+rankdir=\`pwd\`
+
 SPARK_CONF_DIR=${COMMON_DIR}/conf \
 SPARK_LOCAL_DIRS=${rankdir}/localdir \
 SPARK_WORKER_DIR=${rankdir}/work \
@@ -129,4 +174,29 @@ SPARK_LOG_DIR=${rankdir}/logs \
 SPARK_PID_DIR=${rankdir}/pids \
 ${SPARK_HOME}/sbin/start-master.sh
 
-mpiexec /work/system/bin/msh /bin/bash ${COMMON_DIR}/start-slave.sh
+spark-k-wait-master-initialize
+EOF
+
+
+cat << EOF >../stop-master.sh
+#!/usr/bin/env bash
+
+unset POSIXLY_CORRECT
+
+if [ "\`hostname\`" != "${SPARK_MASTER_NODE}" ]; then
+    exit 0
+fi
+
+rankdir=\`pwd\`
+
+SPARK_CONF_DIR=${COMMON_DIR}/conf \
+SPARK_LOCAL_DIRS=${rankdir}/localdir \
+SPARK_WORKER_DIR=${rankdir}/work \
+SPARK_LOG_DIR=${rankdir}/logs \
+SPARK_PID_DIR=${rankdir}/pids \
+${SPARK_HOME}/sbin/stop-master.sh
+EOF
+
+mpiexec /work/system/bin/msh ${COMMON_DIR}/start-slave.sh
+
+mpiexec /work/system/bin/msh ${COMMON_DIR}/start-master.sh

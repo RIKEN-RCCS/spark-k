@@ -4,6 +4,10 @@
 # Spark on K finalize script
 #
 
+curdir=`pwd`
+# move to the home directory
+cd
+
 #
 # K Job system forcibly exports POSIXY_CORRECT, so unset it.
 #
@@ -17,3 +21,5 @@ spark-k-wait-spark-job-finish
 mpiexec /work/system/bin/msh ${common_dir}/stop-slave.sh
 
 mpiexec /work/system/bin/msh ${common_dir}/stop-master.sh
+
+cd ${curdir}

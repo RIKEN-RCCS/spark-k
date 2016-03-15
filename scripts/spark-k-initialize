@@ -4,6 +4,9 @@
 # Spark on K intialize script
 #
 
+curdir=`pwd`
+# move to the home directory
+cd
 
 #
 # K Job system forcibly exports POSIXY_CORRECT, so unset it.
@@ -200,3 +203,5 @@ EOF
 mpiexec /work/system/bin/msh ${COMMON_DIR}/start-slave.sh
 
 mpiexec /work/system/bin/msh ${COMMON_DIR}/start-master.sh
+
+cd ${curdir}

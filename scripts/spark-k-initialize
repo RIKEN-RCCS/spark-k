@@ -15,9 +15,9 @@ unset POSIXLY_CORRECT
 mpiexec /work/system/bin/msh hostname > k_nodes 2> /dev/null
 export NODES_NUBMER=`wc -l k_nodes 2> /dev/null`
 
-if [ "${NODES_NUBMER}" -gt 1 -a ! -z "${USE_DRIVER_NODE}" ]; then
-    K_MASTER_NODE="`tail -n 1 k_nodes`"
+if [ "${NODES_NUBMER}" -gt 1 ] && [ ! -z "${SEPARATE_DRIVER_NODE}" -a "${SEPARATE_DRIVER_NODE}" == "y" ]; then
     K_DRIVER_NODE="`hotaname`"
+    K_MASTER_NODE="`grep -v \`hostname\` k_nodes | head -n 1`"
 else
     K_MASTER_NODE="`hostname`"
     K_DRIVER_NODE=""

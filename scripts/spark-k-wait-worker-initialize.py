@@ -54,6 +54,8 @@ class Command():
 
     __parser.add_argument('--timeout', type=int, default=300)
 
+    __parser.add_argument('--nodes', type=str, default=None)
+
     __parser.add_argument('spark_master_log', action='store', type=str)
 
 
@@ -70,12 +72,16 @@ class Command():
 
 
     @classmethod
-    def get_K_nodes(cls):
+    def get_K_nodes(cls, node_file=None):
         """ get K nodes """
-        p = Popen('mpiexec /work/system/bin/msh hostname',
-                  stdout=PIPE, stderr=PIPE)
-        out, err = p.communicate()
-        return out.split()
+        if node_file and os.path.exists(node_file):
+            with open(node_file) as f:
+                return f.readlines()
+        else:
+            p = Popen('mpiexec /work/system/bin/msh hostname',
+                    stdout=PIPE, stderr=PIPE)
+            out, err = p.communicate()
+            return out.split()
 
 
     @classmethod
@@ -87,7 +93,7 @@ class Command():
         if args.debug:
             LOG.setLevel(logging.DEBUG)
 
-        nodes = cls.get_K_nodes()
+        nodes = cls.get_K_nodes(args.nodes)
 
         count = 0
 

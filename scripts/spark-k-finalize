@@ -18,8 +18,6 @@ common_dir=`(cd ..; pwd)`
 
 spark-k-wait-spark-job-finish
 
-mpiexec /work/system/bin/msh ${common_dir}/stop-slave.sh
-
-mpiexec /work/system/bin/msh ${common_dir}/stop-master.sh
+mpiexec /work/system/bin/msh ${common_dir}/stop-spark.sh
 
 cd ${curdir}

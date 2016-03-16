@@ -110,19 +110,21 @@ export PYTHON_HOME=${PYTHON_HOME}
 export PATH=\${PYTHON_HOME}/bin:\${PATH}
 export LD_LIBRARY_PATH=\${PYTHON_HOME}/lib:\${LD_LIBRARY_PATH}
 
-if [ "\`hostname\`" == "${SPARK_MASTER_NODE}" ]; then
+hostname=\`hostname\`
+
+if [ "\${hostname}" == "${SPARK_MASTER_NODE}" ]; then
     ${SPARK_ENV} ${SPARK_HOME}/sbin/start-master.sh
 fi
 
-if [ \`hostname\` != ${K_DRIVER_NODE} -a \`hostname\` != ${K_MASTER_NODE} ] \\
-   [ \`hostname\` == ${K_DRIVER_NODE} -a ${NODES_NUBMER} -eq 1 ] || \
-   [ \`hostname\` == ${K_MASTER_NODE} -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
-   [ \`hostname\` == ${K_MASTER_NODE} -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
+if [ \${hostname} != ${K_DRIVER_NODE} -a \${hostname} != ${K_MASTER_NODE} ] || \
+   [ \${hostname} == ${K_DRIVER_NODE} -a ${NODES_NUBMER} -eq 1 ] || \
+   [ \${hostname} == ${K_MASTER_NODE} -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
+   [ \${hostname} == ${K_MASTER_NODE} -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
 
    ${SPARK_ENV} ${SPARK_HOME}/sbin/start-slave.sh
 fi
 
-if [ "\`hostname\`" == "${SPARK_MASTER_NODE}" ]; then
+if [ "\${hostname}" == "${SPARK_MASTER_NODE}" ]; then
    ${SPARK_K}/spark-k-wait-initialize
 fi
 
@@ -152,19 +154,21 @@ export PYTHON_HOME=${PYTHON_HOME}
 export PATH=\${PYTHON_HOME}/bin:\${PATH}
 export LD_LIBRARY_PATH=\${PYTHON_HOME}/lib:\${LD_LIBRARY_PATH}
 
-if [ "\`hostname\`" == "${SPARK_MASTER_NODE}" ]; then
+hostname=\`hostname\`
+
+if [ "\${hostname}" == "${SPARK_MASTER_NODE}" ]; then
    ${SPARK_K}/spark-k-wait-spark-job-finish
 fi
 
-if [ \`hostname\` != ${K_DRIVER_NODE} -a \`hostname\` != ${K_MASTER_NODE} ] \\
-   [ \`hostname\` == ${K_DRIVER_NODE} -a ${NODES_NUBMER} -eq 1 ] || \
-   [ \`hostname\` == ${K_MASTER_NODE} -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
-   [ \`hostname\` == ${K_MASTER_NODE} -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
+if [ \${hostname} != ${K_DRIVER_NODE} -a \${hostname} != ${K_MASTER_NODE} ] \\
+   [ \${hostname} == ${K_DRIVER_NODE} -a ${NODES_NUBMER} -eq 1 ] || \
+   [ \${hostname} == ${K_MASTER_NODE} -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
+   [ \${hostname} == ${K_MASTER_NODE} -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
 
     ${SPARK_ENV} ${SPARK_HOME}/sbin/stop-slave.sh
 fi
 
-if [ "\`hostname\`" == "${SPARK_MASTER_NODE}" ]; then
+if [ "\${hostname}" == "${SPARK_MASTER_NODE}" ]; then
     ${SPARK_ENV} ${SPARK_HOME}/sbin/stop-master.sh
 fi
 EOF

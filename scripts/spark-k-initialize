@@ -16,20 +16,34 @@ unset POSIXLY_CORRECT
 . /work/system/Env_base 1> /dev/null 2>&1
 
 mpiexec /work/system/bin/msh hostname > k_nodes 2> /dev/null
-export NODES_NUBMER=`wc -l k_nodes 2> /dev/null`
+NODES_NUBMER=`cat k_nodes | wc -l 2> /dev/null`
 
 if [ "${NODES_NUBMER}" -gt 1 ] && [ ! -z "${SEPARATE_DRIVER_NODE}" -a "${SEPARATE_DRIVER_NODE}" == "y" ]; then
     K_DRIVER_NODE="`hotaname`"
     K_MASTER_NODE="`grep -v \`hostname\` k_nodes | head -n 1`"
+    if [ "${NODES_NUBMER}" -gt 2 ]; then
+        WORKERS_NUMBER=`expr $NODES_NUBMER - 2`
+    else
+        WORKERS_NUMBER=1
+    fi
 else
     K_MASTER_NODE="`hostname`"
     K_DRIVER_NODE=""
+    if [ "${NODES_NUBMER}" -gt 1 ]; then
+        WORKERS_NUMBER=`expr $NODES_NUBMER - 1`
+    else
+        WORKERS_NUMBER=1
+    fi
 fi
 
-COMMON_DIR=`(cd ..; pwd)`
+if [ "0" == "`basename ${HOME}`" ]; then
+    COMMON_DIR=`(cd ..; pwd)`
+else
+    COMMON_DIR=`pwd`
+fi
 SPARK_ARCHIVE=spark-1.6.0-bin-custom-spark
 
-mkdir ${COMMON_DIR}/conf
+mkdir -p ${COMMON_DIR}/conf
 cat << EOS > ${COMMON_DIR}/conf/spark-env.sh
 . /work/system/Env_base 1> /dev/null 2>&1
 EOS
@@ -40,18 +54,20 @@ else if [ -d /opt/local/spark ]; then
   SPARK_HOME=/opt/local/spark
 else if [ -d /opt/aics/spark ]; then
   SPARK_HOME=/opt/aics/spark
-else if [ -f ./spark-1.6.0-bin-custom-spark.tgz ]; then
+else if [ -f ./${SPARK_ARCHIVE}.tgz ]; then
   # Expects Spark tarball exists
-  tar zxf ${SPARK_ARCHIVE}.tgz
-  mv ${SPARK_ARCHIVE} ../
-  SPARK_HOME=`pwd`/../${SPARK_ARCHIVE}
+  SPARK_HOME=${COMMON_DIR}/${SPARK_ARCHIVE}
   SPARK_HOME=`(cd ${SPARK_HOME}; pwd)`
+  if [ ! -d  ${SPARK_HOME} ]; then
+    tar zxf ${SPARK_ARCHIVE}.tgz
+    mv ${SPARK_ARCHIVE} ${COMMON_DIR}/ 
+  fi
 else
   # Expects spark-submit is in PATH
-  spark_sumit=`which spark-submit 2> /dev/null`
+  spark_submit=`which spark-submit 2> /dev/null`
   if [ $? -eq 0 ]; then
-    dir=`dirname $spark_sumit`
-    SPARK_HOME=`cd $dir; ..`
+    dir=`dirname ${spark_sumit}`
+    SPARK_HOME=`(cd ${dir}; pwd)`
   fi
 fi; fi; fi; fi
 
@@ -65,17 +81,19 @@ export SPARK_HOME
 export JAVA_HOME=/opt/klocal/openjdk7u45
 export PATH=${JAVA_HOME}/bin:$PATH
 export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar
-export SPARK_MASTER_NODE=spark://${K_MASTER_NODE}:7077
+export SPARK_MASTER=spark://${K_MASTER_NODE}:7077
 
 # Spark environments those passed to Spark master and worker
+# NOTE: non-null SPARK_MASTER environment variable cause rsync in start-master/slave.sh
 SPARK_ENV="SPARK_CONF_DIR=${COMMON_DIR}/conf \
 SPARK_LOCAL_DIRS=\${rankdir}/localdir \
 SPARK_WORKER_DIR=\${rankdir}/work \
 SPARK_LOG_DIR=\${rankdir}/logs \
-SPARK_PID_DIR=\${rankdir}/pids "
+SPARK_PID_DIR=\${rankdir}/pids \
+SPARK_MASTER= "
 
 # Python configuration
-export PYTHON_HOME=/opt/local/Python-2.7.3/bin
+export PYTHON_HOME=/opt/local/Python-2.7.3
 export PATH=${PYTHON_HOME}/bin:${PATH}
 export LD_LIBRARY_PATH=${PYTHON_HOME}/lib:${LD_LIBRARY_PATH}
 
@@ -86,8 +104,11 @@ export PATH=${RHOME}/bin:$PATH
 # Other configuration
 export COMMON_DIR
 
-cat << EOF > $${COMMON_DIR}/start-spark.sh
+
+cat << EOF > ${COMMON_DIR}/start-spark.sh
 #!/usr/bin/env bash
+
+set -x
 
 unset POSIXLY_CORRECT
 
@@ -112,27 +133,30 @@ export LD_LIBRARY_PATH=\${PYTHON_HOME}/lib:\${LD_LIBRARY_PATH}
 
 hostname=\`hostname\`
 
-if [ "\${hostname}" == "${SPARK_MASTER_NODE}" ]; then
+if [ "\${hostname}" == "${K_MASTER_NODE}" ]; then
     ${SPARK_ENV} ${SPARK_HOME}/sbin/start-master.sh
 fi
 
-if [ \${hostname} != ${K_DRIVER_NODE} -a \${hostname} != ${K_MASTER_NODE} ] || \
-   [ \${hostname} == ${K_DRIVER_NODE} -a ${NODES_NUBMER} -eq 1 ] || \
-   [ \${hostname} == ${K_MASTER_NODE} -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
-   [ \${hostname} == ${K_MASTER_NODE} -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
+if [ \${hostname}x != ${K_DRIVER_NODE}x -a \${hostname}x != ${K_MASTER_NODE}x ] || \
+   [ \${hostname}x == ${K_DRIVER_NODE}x -a ${NODES_NUBMER} -eq 1 ] || \
+   [ \${hostname}x == ${K_MASTER_NODE}x -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
+   [ \${hostname}x == ${K_MASTER_NODE}x -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
 
-   ${SPARK_ENV} ${SPARK_HOME}/sbin/start-slave.sh
+   ${SPARK_ENV} ${SPARK_HOME}/sbin/start-slave.sh ${SPARK_MASTER}
 fi
 
-if [ "\${hostname}" == "${SPARK_MASTER_NODE}" ]; then
-   ${SPARK_K}/spark-k-wait-initialize
+if [ "\${hostname}" == "${K_MASTER_NODE}" ]; then
+   master_log="\${rankdir}/logs/\`ls -1tr \${rankdir}/logs | grep 'Master' | tail -n 1\`"
+   ${SPARK_K}spark-k-wait-initialize --node-num ${WORKERS_NUMBER} \${master_log}
 fi
-
 EOF
+chmod +x ${COMMON_DIR}/start-spark.sh
 
 cat << EOF > ${COMMON_DIR}/stop-spark.sh
 #!/usr/bin/env bash
 
+set -x
+
 unset POSIXLY_CORRECT
 
 rankdir=\`pwd\`
@@ -156,22 +180,23 @@ export LD_LIBRARY_PATH=\${PYTHON_HOME}/lib:\${LD_LIBRARY_PATH}
 
 hostname=\`hostname\`
 
-if [ "\${hostname}" == "${SPARK_MASTER_NODE}" ]; then
-   ${SPARK_K}/spark-k-wait-spark-job-finish
+if [ "\${hostname}" == "${K_MASTER_NODE}" ]; then
+   ${SPARK_K}spark-k-wait-spark-job-finish
 fi
 
-if [ \${hostname} != ${K_DRIVER_NODE} -a \${hostname} != ${K_MASTER_NODE} ] \\
-   [ \${hostname} == ${K_DRIVER_NODE} -a ${NODES_NUBMER} -eq 1 ] || \
-   [ \${hostname} == ${K_MASTER_NODE} -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
-   [ \${hostname} == ${K_MASTER_NODE} -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
+if [ \${hostname}x != ${K_DRIVER_NODE}x -a \${hostname} != ${K_MASTER_NODE} ] || \
+   [ \${hostname}x == ${K_DRIVER_NODE}x -a ${NODES_NUBMER} -eq 1 ] || \
+   [ \${hostname}x == ${K_MASTER_NODE}x -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
+   [ \${hostname}x == ${K_MASTER_NODE}x -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
 
     ${SPARK_ENV} ${SPARK_HOME}/sbin/stop-slave.sh
 fi
 
-if [ "\${hostname}" == "${SPARK_MASTER_NODE}" ]; then
+if [ "\${hostname}" == "${K_MASTER_NODE}" ]; then
     ${SPARK_ENV} ${SPARK_HOME}/sbin/stop-master.sh
 fi
 EOF
+chmod +x ${COMMON_DIR}/stop-spark.sh
 
 mpiexec /work/system/bin/msh ${COMMON_DIR}/start-spark.sh
 

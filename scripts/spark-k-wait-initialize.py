@@ -36,7 +36,7 @@ class Timer():
         self.upper_limit = self.base_time + self.after
 
 
-    def reach_timeout():
+    def reach_timeout(self):
         return time.time() > self.upper_limit
 
 
@@ -54,7 +54,7 @@ class Command():
 
     __parser.add_argument('--timeout', type=int, default=300)
 
-    __parser.add_argument('--nodes', type=str, default=None)
+    __parser.add_argument('--node-num', type=int, default=0)
 
     __parser.add_argument('spark_master_log', action='store', type=str)
 
@@ -72,19 +72,6 @@ class Command():
 
 
     @classmethod
-    def get_K_nodes(cls, node_file=None):
-        """ get K nodes """
-        if node_file and os.path.exists(node_file):
-            with open(node_file) as f:
-                return f.readlines()
-        else:
-            p = Popen('mpiexec /work/system/bin/msh hostname',
-                    stdout=PIPE, stderr=PIPE)
-            out, err = p.communicate()
-            return out.split()
-
-
-    @classmethod
     def run(cls):
         """ Run the this command """
 
@@ -93,15 +80,12 @@ class Command():
         if args.debug:
             LOG.setLevel(logging.DEBUG)
 
-        nodes = cls.get_K_nodes(args.nodes)
-
         count = 0
-
         timer = Timer(after=args.timeout)
         for line in tailf(args.spark_master_log, args.interval):
             if 'Registering worker' in line:
                 count = count + 1
-                if len(nodes) == counts:
+                if args.node_num <= count:
                     break
             elif 'Removing worker' in line:
                 count = count - 1

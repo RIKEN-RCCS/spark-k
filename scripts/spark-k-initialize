@@ -123,7 +123,7 @@ if [ \`hostname\` != ${K_DRIVER_NODE} -a \`hostname\` != ${K_MASTER_NODE} ] \\
 fi
 
 if [ "\`hostname\`" == "${SPARK_MASTER_NODE}" ]; then
-   ${SPARK_K}/spark-k-wait-master-initialize
+   ${SPARK_K}/spark-k-wait-initialize
 fi
 
 EOF

@@ -16,7 +16,7 @@ unset POSIXLY_CORRECT
 . /work/system/Env_base 1> /dev/null 2>&1
 
 mpiexec /work/system/bin/msh hostname > k_nodes 2> /dev/null
-NODES_NUBMER=`cat k_nodes | wc -l 2> /dev/null`
+NODES_NUBMER=`wc -l k_nodes | awk '{print $1}' 2> /dev/null`
 
 if [ "${NODES_NUBMER}" -gt 1 ] && [ ! -z "${SEPARATE_DRIVER_NODE}" -a "${SEPARATE_DRIVER_NODE}" == "y" ]; then
     K_DRIVER_NODE="`hotaname`"
@@ -36,7 +36,8 @@ else
     fi
 fi
 
-if [ "0" == "`basename ${HOME}`" ]; then
+rankdir=`pwd`
+if [ "0" == "`basename ${rankdir}`" ]; then
     COMMON_DIR=`(cd ..; pwd)`
 else
     COMMON_DIR=`pwd`
@@ -57,11 +58,11 @@ else if [ -d /opt/aics/spark ]; then
 else if [ -f ./${SPARK_ARCHIVE}.tgz ]; then
   # Expects Spark tarball exists
   SPARK_HOME=${COMMON_DIR}/${SPARK_ARCHIVE}
-  SPARK_HOME=`(cd ${SPARK_HOME}; pwd)`
   if [ ! -d  ${SPARK_HOME} ]; then
     tar zxf ${SPARK_ARCHIVE}.tgz
     mv ${SPARK_ARCHIVE} ${COMMON_DIR}/ 
   fi
+  SPARK_HOME=`(cd ${SPARK_HOME}; pwd)`
 else
   # Expects spark-submit is in PATH
   spark_submit=`which spark-submit 2> /dev/null`

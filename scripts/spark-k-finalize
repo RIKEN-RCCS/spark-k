@@ -15,13 +15,13 @@ unset POSIXLY_CORRECT
 
 rankdir=`pwd`
 common_dir=`(cd ..; pwd)`
-if [ "0" == "`basename ${HOME}`" ]; then
+if [ "0" == "`basename ${rankdir}`" ]; then
     common_dir=`(cd ..; pwd)`
 else
     common_dir=`pwd`
 fi
 
-${SPARK_K}spark-k-wait-spark-job-finish --host ${K_MASTER_NODE}
+${SPARK_K}spark-k-wait-spark-job-finish --debug --host ${K_MASTER_NODE}
 
 mpiexec /work/system/bin/msh ${common_dir}/stop-spark.sh
 

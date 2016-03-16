@@ -21,7 +21,7 @@ else
     common_dir=`pwd`
 fi
 
-${SPARK_K}spark-k-wait-spark-job-finish --debug --host ${K_MASTER_NODE}
+${SPARK_K}spark-k-wait-spark-job-finish --host ${K_MASTER_NODE}
 
 mpiexec /work/system/bin/msh ${common_dir}/stop-spark.sh
 

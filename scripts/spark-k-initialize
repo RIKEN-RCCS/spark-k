@@ -60,21 +60,31 @@ if [ -z "$SPARK_HOME" ]; then
   exit 1
 fi
 
+# Spark configuration
 export SPARK_HOME
 export JAVA_HOME=/opt/klocal/openjdk7u45
 export PATH=${JAVA_HOME}/bin:$PATH
 export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar
+export SPARK_MASTER_NODE=spark://${K_MASTER_NODE}:7077
 
-export RHOME=/opt/aics/R
+# Spark environments those passed to Spark master and worker
+SPARK_ENV="SPARK_CONF_DIR=${COMMON_DIR}/conf \
+SPARK_LOCAL_DIRS=\${rankdir}/localdir \
+SPARK_WORKER_DIR=\${rankdir}/work \
+SPARK_LOG_DIR=\${rankdir}/logs \
+SPARK_PID_DIR=\${rankdir}/pids "
 
+# Python configuration
 export PYTHON_HOME=/opt/local/Python-2.7.3/bin
-
 export PATH=${PYTHON_HOME}/bin:${PATH}
 export LD_LIBRARY_PATH=${PYTHON_HOME}/lib:${LD_LIBRARY_PATH}
 
-export COMMON_DIR
-export SPARK_MASTER_NODE=spark://${K_MASTER_NODE}:7077
+# R configuration
+export RHOME=/opt/aics/R
+export PATH=${RHOME}/bin:$PATH
 
+# Other configuration
+export COMMON_DIR
 
 cat << EOF > $${COMMON_DIR}/start-spark.sh
 #!/usr/bin/env bash
@@ -88,8 +98,8 @@ rankdir=\`pwd\`
 # Spark Configurations
 export SPARK_HOME=${SPARK_HOME}
 export JAVA_HOME=${JAVA_HOME}
-export PATH=${JAVA_HOME}/bin:$PATH
-export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar
+export PATH=\${JAVA_HOME}/bin:$PATH
+export CLASSPATH=.:\${JAVA_HOME}/jre/lib:\${JAVA_HOME}/lib:\${JAVA_HOME}/lib/tools.jar
 
 # R Configurations
 export RHOME=${RHOME}
@@ -97,30 +107,19 @@ export PATH=\${RHOME}/bin:$PATH
 
 # Python Configurations
 export PYTHON_HOME=${PYTHON_HOME}
-export PATH=\${PYTHON_HOME}/bin:${PATH}
+export PATH=\${PYTHON_HOME}/bin:\${PATH}
 export LD_LIBRARY_PATH=\${PYTHON_HOME}/lib:\${LD_LIBRARY_PATH}
 
 if [ "\`hostname\`" == "${SPARK_MASTER_NODE}" ]; then
-    SPARK_CONF_DIR=${COMMON_DIR}/conf \
-    SPARK_LOCAL_DIRS=${rankdir}/localdir \
-    SPARK_WORKER_DIR=${rankdir}/work \
-    SPARK_LOG_DIR=${rankdir}/logs \
-    SPARK_PID_DIR=${rankdir}/pids \
-    ${SPARK_HOME}/sbin/start-master.sh
-
+    ${SPARK_ENV} ${SPARK_HOME}/sbin/start-master.sh
 fi
 
-if [ \`hostname\` == ${K_DRIVER_NODE} -a ${NODES_NUBMER} -eq 1 ] || \
+if [ \`hostname\` != ${K_DRIVER_NODE} -a \`hostname\` != ${K_MASTER_NODE} ] \\
+   [ \`hostname\` == ${K_DRIVER_NODE} -a ${NODES_NUBMER} -eq 1 ] || \
    [ \`hostname\` == ${K_MASTER_NODE} -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
-   [ \`hostname\` == ${K_MASTER_NODE} -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ] || \
-   [ \`hostname\` != ${K_DRIVER_NODE} -a \`hostname\` != ${K_MASTER_NODE} ]; then
+   [ \`hostname\` == ${K_MASTER_NODE} -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
 
-   SPARK_CONF_DIR=${COMMON_DIR}/conf \
-   SPARK_LOCAL_DIRS=\${rankdir}/localdir \
-   SPARK_LOG_DIR=\${rankdir}/logs \
-   SPARK_WORKER_DIR=\${rankdir}/work \
-   SPARK_PID_DIR=\${rankdir}/pids \
-   ${SPARK_HOME}/sbin/start-slave.sh
+   ${SPARK_ENV} ${SPARK_HOME}/sbin/start-slave.sh
 fi
 
 if [ "\`hostname\`" == "${SPARK_MASTER_NODE}" ]; then
@@ -141,8 +140,8 @@ rankdir=\`pwd\`
 # Spark Configurations
 export SPARK_HOME=${SPARK_HOME}
 export JAVA_HOME=${JAVA_HOME}
-export PATH=${JAVA_HOME}/bin:$PATH
-export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar
+export PATH=\${JAVA_HOME}/bin:$PATH
+export CLASSPATH=.:\${JAVA_HOME}/jre/lib:\${JAVA_HOME}/lib:\${JAVA_HOME}/lib/tools.jar
 
 # R Configurations
 export RHOME=${RHOME}
@@ -150,33 +149,23 @@ export PATH=\${RHOME}/bin:$PATH
 
 # Python Configurations
 export PYTHON_HOME=${PYTHON_HOME}
-export PATH=\${PYTHON_HOME}/bin:${PATH}
+export PATH=\${PYTHON_HOME}/bin:\${PATH}
 export LD_LIBRARY_PATH=\${PYTHON_HOME}/lib:\${LD_LIBRARY_PATH}
 
 if [ "\`hostname\`" == "${SPARK_MASTER_NODE}" ]; then
    ${SPARK_K}/spark-k-wait-spark-job-finish
 fi
 
-if [ \`hostname\` == ${K_DRIVER_NODE} -a ${NODES_NUBMER} -eq 1 ] || \
+if [ \`hostname\` != ${K_DRIVER_NODE} -a \`hostname\` != ${K_MASTER_NODE} ] \\
+   [ \`hostname\` == ${K_DRIVER_NODE} -a ${NODES_NUBMER} -eq 1 ] || \
    [ \`hostname\` == ${K_MASTER_NODE} -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
-   [ \`hostname\` == ${K_MASTER_NODE} -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ] || \
-   [ \`hostname\` != ${K_DRIVER_NODE} -a \`hostname\` != ${K_MASTER_NODE} ]; then
+   [ \`hostname\` == ${K_MASTER_NODE} -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
 
-   SPARK_CONF_DIR=${COMMON_DIR}/conf \
-   SPARK_LOCAL_DIRS=\${rankdir}/localdir \
-   SPARK_LOG_DIR=\${rankdir}/logs \
-   SPARK_WORKER_DIR=\${rankdir}/work \
-   SPARK_PID_DIR=\${rankdir}/pids \
-   ${SPARK_HOME}/sbin/stop-slave.sh
+    ${SPARK_ENV} ${SPARK_HOME}/sbin/stop-slave.sh
 fi
 
 if [ "\`hostname\`" == "${SPARK_MASTER_NODE}" ]; then
-    SPARK_CONF_DIR=${COMMON_DIR}/conf \
-    SPARK_LOCAL_DIRS=${rankdir}/localdir \
-    SPARK_WORKER_DIR=${rankdir}/work \
-    SPARK_LOG_DIR=${rankdir}/logs \
-    SPARK_PID_DIR=${rankdir}/pids \
-    ${SPARK_HOME}/sbin/stop-master.sh
+    ${SPARK_ENV} ${SPARK_HOME}/sbin/stop-master.sh
 fi
 EOF
 

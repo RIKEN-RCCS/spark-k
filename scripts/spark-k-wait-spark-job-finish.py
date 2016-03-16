@@ -80,8 +80,6 @@ class WaitCommand():
             LOG.debug('status code is {}'.format(response.getcode()))
 
             body = response.read()
-            LOG.debug('Server responce is {}'.format(body))
-
             try:
                 applications = json.loads(body)
             except ValueError, e:
@@ -94,6 +92,18 @@ class WaitCommand():
             if applications is not None and len(applications) == 0:
                 LOG.debug('no application runs')
                 return 0
+            else:
+                working = 0
+                for app in applications:
+                    for attempt in app['attempts']:
+                        if attempt.get('completed', False):
+                            break
+                    else:
+                        working = working + 1
+                if working == 0:
+                    LOG.debug('no application runs')
+                    return 0
+
             time.sleep(args.interval)
 
 

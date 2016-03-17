@@ -6,6 +6,12 @@
 
 curdir=`pwd`
 cd ${PJM_JOBDIR}
+COMMON_DIR=`pwd`
+
+if [ -d "${PJM_JOBDIR}/0" ]; then
+    cd ${PJM_JOBDIR}/0
+fi
+rankdir=`pwd`
 
 #
 # K Job system forcibly exports POSIXY_CORRECT, so unset it.
@@ -14,11 +20,20 @@ unset POSIXLY_CORRECT
 
 . /work/system/Env_base 1> /dev/null 2>&1
 
-mpiexec /work/system/bin/msh hostname > k_nodes 2> /dev/null
-NODES_NUBMER=`wc -l k_nodes | awk '{print $1}' 2> /dev/null`
+mkdir -p ${COMMON_DIR}/hosts
 
-if [ "${NODES_NUBMER}" -gt 1 ] && [ ! -z "${SEPARATE_DRIVER_NODE}" -a "${SEPARATE_DRIVER_NODE}" == "y" ]; then
-    K_DRIVER_NODE="`hotaname`"
+cat << EOF > ${COMMON_DIR}/gen_hosts.sh
+#!/bin/sh
+
+touch ${COMMON_DIR}/hosts/\`hostname\`
+EOF
+
+mpiexec /work/system/bin/msh sh ${COMMON_DIR}/gen_hosts.sh
+(cd ${COMMON_DIR}/hosts; ls -1) > k_nodes
+
+NODES_NUBMER=`wc -l k_nodes 2>&1 | awk '{print $1}' 2> /dev/null`
+if [ "${NODES_NUBMER}" -gt 1 ] && [ ! -z "${SEPARATE_DRIVER_NODE}" ]; then
+    K_DRIVER_NODE="`hostname`"
     K_MASTER_NODE="`grep -v \`hostname\` k_nodes | head -n 1`"
     if [ "${NODES_NUBMER}" -gt 2 ]; then
         WORKERS_NUMBER=`expr $NODES_NUBMER - 2`
@@ -35,12 +50,6 @@ else
     fi
 fi
 
-rankdir=`pwd`
-if [ "0" == "`basename ${rankdir}`" ]; then
-    COMMON_DIR=`(cd ..; pwd)`
-else
-    COMMON_DIR=`pwd`
-fi
 SPARK_ARCHIVE=spark-1.6.0-bin-custom-spark
 
 mkdir -p ${COMMON_DIR}/conf

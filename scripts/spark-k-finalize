@@ -6,7 +6,7 @@
 
 curdir=`pwd`
 # move to the home directory
-cd
+cd ${PJM_JOBDIR}
 
 #
 # K Job system forcibly exports POSIXY_CORRECT, so unset it.
@@ -14,15 +14,17 @@ cd
 unset POSIXLY_CORRECT
 
 rankdir=`pwd`
-common_dir=`(cd ..; pwd)`
-if [ "0" == "`basename ${rankdir}`" ]; then
-    common_dir=`(cd ..; pwd)`
-else
-    common_dir=`pwd`
+if [ -z "${COMMON_DIR}" ]; then
+    COMMON_DIR=`(cd ..; pwd)`
+    if [ "0" == "`basename ${rankdir}`" ]; then
+        COMMON_DIR=`(cd ..; pwd)`
+    else
+        COMMON_DIR=`pwd`
+    fi
 fi
 
 ${SPARK_K}spark-k-wait-spark-job-finish --host ${K_MASTER_NODE}
 
-mpiexec /work/system/bin/msh ${common_dir}/stop-spark.sh
+mpiexec /work/system/bin/msh ${COMMON_DIR}/stop-spark.sh
 
 cd ${curdir}

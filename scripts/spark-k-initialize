@@ -5,8 +5,7 @@
 #
 
 curdir=`pwd`
-# move to the home directory
-cd
+cd ${PJM_JOBDIR}
 
 #
 # K Job system forcibly exports POSIXY_CORRECT, so unset it.

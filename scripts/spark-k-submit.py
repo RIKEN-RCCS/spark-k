@@ -34,14 +34,13 @@ class SubmitCommand():
     def modify_spark_arguments(cls, dummy_args):
         """ Replace spark option for K"""
         spark_args = [
-            '--deploy-mode', 'client',
             '--master', '${SPARK_MASTER}',
             ]
 
         for idx, arg in enumerate(dummy_args):
             if arg is None:
                 continue
-            elif arg in ('--master', '--deploy-mode'):
+            elif arg in ('--master'):
                 if idx + 1 < len(dummy_args) and dummy_args[idx + 1][0] != '-':
                     LOG.warn('remove "{0} {1}" from option'.format(
                         arg, dummy_args[idx + 1]))

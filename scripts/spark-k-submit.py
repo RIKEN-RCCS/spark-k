@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+"""
+Wrapper script of spark-submit for the K environment
+"""
+
+
 import os
 import sys
 import json

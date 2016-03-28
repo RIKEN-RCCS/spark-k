@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Wait until all Spark applications finish
+"""
+
 import sys
 import urllib2
 import json

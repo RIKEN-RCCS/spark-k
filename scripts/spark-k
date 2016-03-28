@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+#
+# Wrapper script of an any command for the K environment
+#
+
 dir=`dirname $0`
 
 . ${dir}/spark-k-initialize
@@ -7,4 +11,3 @@ dir=`dirname $0`
 $@
 
 . ${dir}/spark-k-finalize
-

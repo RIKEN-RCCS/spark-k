@@ -1,22 +1,31 @@
 #!/bin/sh
 
 #
+# Script to initialize the Spark environment on K
+#
+
+
+#
+# K Job system forcibly exports POSIXY_CORRECT, so unset it.
+#
+unset POSIXLY_CORRECT
+
+#
 # Spark on K intialize script
 #
 
-curdir=`pwd`
+K_NODES_FILE=.k_nodes
+K_WORKER_NODES_FILE=.k_worker_nodes
+SPARK_ARCHIVE=spark-1.6.0-bin-custom-spark
+
+_curdir=`pwd`
 cd ${PJM_JOBDIR}
 COMMON_DIR=`pwd`
 
 if [ -d "${PJM_JOBDIR}/0" ]; then
     cd ${PJM_JOBDIR}/0
 fi
-rankdir=`pwd`
-
-#
-# K Job system forcibly exports POSIXY_CORRECT, so unset it.
-#
-unset POSIXLY_CORRECT
+_rankdir=`pwd`
 
 . /work/system/Env_base 1> /dev/null 2>&1
 
@@ -26,31 +35,43 @@ cat << EOF > ${COMMON_DIR}/gen_hosts.sh
 #!/bin/sh
 
 touch ${COMMON_DIR}/hosts/\`hostname\`
+sync
 EOF
 
-mpiexec /work/system/bin/msh sh ${COMMON_DIR}/gen_hosts.sh
-(cd ${COMMON_DIR}/hosts; ls -1) > k_nodes
+if [ ! -f ${K_NODES_FILE} ]; then
+    mpiexec /work/system/bin/msh sh ${COMMON_DIR}/gen_hosts.sh
+    (cd ${COMMON_DIR}/hosts; ls -1) > ${K_NODES_FILE}
+fi
 
-NODES_NUBMER=`wc -l k_nodes 2>&1 | awk '{print $1}' 2> /dev/null`
+NODES_NUBMER=`wc -l ${K_NODES_FILE} 2>&1 | awk '{print $1}' 2> /dev/null`
 if [ "${NODES_NUBMER}" -gt 1 ] && [ ! -z "${SEPARATE_DRIVER_NODE}" ]; then
     K_DRIVER_NODE="`hostname`"
-    K_MASTER_NODE="`grep -v \`hostname\` k_nodes | head -n 1`"
+    K_MASTER_NODE="`grep -v \`hostname\` ${K_NODES_FILE} | head -n 1`"
     if [ "${NODES_NUBMER}" -gt 2 ]; then
-        WORKERS_NUMBER=`expr $NODES_NUBMER - 2`
+        _workers_number=`expr $NODES_NUBMER - 2`
     else
-        WORKERS_NUMBER=1
+        _workers_number=1
     fi
 else
     K_MASTER_NODE="`hostname`"
     K_DRIVER_NODE=""
     if [ "${NODES_NUBMER}" -gt 1 ]; then
-        WORKERS_NUMBER=`expr $NODES_NUBMER - 1`
+        _workers_number=`expr $NODES_NUBMER - 1`
     else
-        WORKERS_NUMBER=1
+        _workers_number=1
     fi
 fi
 
-SPARK_ARCHIVE=spark-1.6.0-bin-custom-spark
+cat ${K_NODES_FILE} |\
+ grep -v ${K_MASTER_NODE} |\
+ ([ -z "${K_DRIVER_NODE}" ] && cat || grep -v ${K_DRIVER_NODE}) > ${COMMON_DIR}/${K_WORKER_NODES_FILE}
+if [ ! -z ${K_WORKER_NODES_NUMBER} ]; then
+    head -n ${K_WORKER_NODES_NUMBER} ${COMMON_DIR}/${K_WORKER_NODES_FILE} > ${COMMON_DIR}/${K_WORKER_NODES_FILE}.tmp
+    mv ${COMMON_DIR}/${K_WORKER_NODES_FILE}.tmp ${COMMON_DIR}/${K_WORKER_NODES_FILE}
+    if [ ${K_WORKER_NODES_NUMBER} -lt ${_workers_number} ]; then
+        _workers_number=${K_WORKER_NODES_NUMBER}
+    fi
+fi
 
 mkdir -p ${COMMON_DIR}/conf
 cat << EOS > ${COMMON_DIR}/conf/spark-env.sh
@@ -95,10 +116,10 @@ export SPARK_MASTER=spark://${K_MASTER_NODE}:7077
 # Spark environments those passed to Spark master and worker
 # NOTE: non-null SPARK_MASTER environment variable cause rsync in start-master/slave.sh
 SPARK_ENV="SPARK_CONF_DIR=${COMMON_DIR}/conf \
-SPARK_LOCAL_DIRS=\${rankdir}/localdir \
-SPARK_WORKER_DIR=\${rankdir}/work \
-SPARK_LOG_DIR=\${rankdir}/logs \
-SPARK_PID_DIR=\${rankdir}/pids \
+SPARK_LOCAL_DIRS=\${_rankdir}/localdir \
+SPARK_WORKER_DIR=\${_rankdir}/work \
+SPARK_LOG_DIR=\${_rankdir}/logs \
+SPARK_PID_DIR=\${_rankdir}/pids \
 SPARK_MASTER= "
 
 # Python configuration
@@ -121,7 +142,7 @@ set -x
 
 unset POSIXLY_CORRECT
 
-rankdir=\`pwd\`
+_rankdir=\`pwd\`
 
 . /work/system/Env_base 1> /dev/null 2>&1
 
@@ -150,12 +171,13 @@ if [ \${hostname}x != ${K_DRIVER_NODE}x -a \${hostname}x != ${K_MASTER_NODE}x ] 
    [ \${hostname}x == ${K_DRIVER_NODE}x -a ${NODES_NUBMER} -eq 1 ] || \
    [ \${hostname}x == ${K_MASTER_NODE}x -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
    [ \${hostname}x == ${K_MASTER_NODE}x -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
-
-   ${SPARK_ENV} ${SPARK_HOME}/sbin/start-slave.sh ${SPARK_MASTER}
+    if [ \`grep -c \${hostname} ${COMMON_DIR}/${K_WORKER_NODES_FILE} \` -eq 1 ]; then
+        ${SPARK_ENV} ${SPARK_HOME}/sbin/start-slave.sh ${SPARK_MASTER}
+    fi
 fi
 
 if [ "\${hostname}" == "${K_MASTER_NODE}" ]; then
-   ${SPARK_K}spark-k-wait-initialize --host ${K_MASTER_NODE} --node-num ${WORKERS_NUMBER}
+   ${SPARK_K}spark-k-wait-initialize --host ${K_MASTER_NODE} --node-num ${_workers_number}
 fi
 EOF
 chmod +x ${COMMON_DIR}/start-spark.sh
@@ -167,7 +189,7 @@ set -x
 
 unset POSIXLY_CORRECT
 
-rankdir=\`pwd\`
+_rankdir=\`pwd\`
 
 . /work/system/Env_base 1> /dev/null 2>&1
 
@@ -189,15 +211,16 @@ export LD_LIBRARY_PATH=\${PYTHON_HOME}/lib:\${LD_LIBRARY_PATH}
 hostname=\`hostname\`
 
 if [ "\${hostname}" == "${K_MASTER_NODE}" ]; then
-   ${SPARK_K}spark-k-wait-spark-job-finish
+    ${SPARK_K}spark-k-wait-spark-job-finish
 fi
 
 if [ \${hostname}x != ${K_DRIVER_NODE}x -a \${hostname} != ${K_MASTER_NODE} ] || \
    [ \${hostname}x == ${K_DRIVER_NODE}x -a ${NODES_NUBMER} -eq 1 ] || \
    [ \${hostname}x == ${K_MASTER_NODE}x -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
    [ \${hostname}x == ${K_MASTER_NODE}x -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
-
-    ${SPARK_ENV} ${SPARK_HOME}/sbin/stop-slave.sh
+    if [ \`grep -c \${hostname} ${COMMON_DIR}/${K_WORKER_NODES_FILE} \` -eq 1 ]; then
+        ${SPARK_ENV} ${SPARK_HOME}/sbin/stop-slave.sh
+    fi
 fi
 
 if [ "\${hostname}" == "${K_MASTER_NODE}" ]; then
@@ -208,4 +231,4 @@ chmod +x ${COMMON_DIR}/stop-spark.sh
 
 mpiexec /work/system/bin/msh ${COMMON_DIR}/start-spark.sh
 
-cd ${curdir}
+cd ${_curdir}

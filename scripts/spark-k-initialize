@@ -122,6 +122,15 @@ SPARK_LOG_DIR=\${_rankdir}/logs \
 SPARK_PID_DIR=\${_rankdir}/pids \
 SPARK_MASTER= "
 
+# Spark environments those passed to Spark master
+SPARK_MASTER_ENV="${SPARK_ENV} \
+SPARK_DAEMON_MEMORY=4g"
+
+# Spark environments those passed to Spark worker
+SPARK_WOKER_ENV="${SPARK_ENV} \
+SPARK_DAEMON_MEMORY=1g"
+
+
 # Python configuration
 export PYTHON_HOME=/opt/local/Python-2.7.3
 export PATH=${PYTHON_HOME}/bin:${PATH}
@@ -164,7 +173,7 @@ export LD_LIBRARY_PATH=\${PYTHON_HOME}/lib:\${LD_LIBRARY_PATH}
 hostname=\`hostname\`
 
 if [ "\${hostname}" == "${K_MASTER_NODE}" ]; then
-    ${SPARK_ENV} ${SPARK_HOME}/sbin/start-master.sh
+    ${SPARK_MASTER_ENV} ${SPARK_HOME}/sbin/start-master.sh
 fi
 
 if [ \${hostname}x != ${K_DRIVER_NODE}x -a \${hostname}x != ${K_MASTER_NODE}x ] || \
@@ -172,7 +181,7 @@ if [ \${hostname}x != ${K_DRIVER_NODE}x -a \${hostname}x != ${K_MASTER_NODE}x ] 
    [ \${hostname}x == ${K_MASTER_NODE}x -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
    [ \${hostname}x == ${K_MASTER_NODE}x -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
     if [ \`grep -c \${hostname} ${COMMON_DIR}/${K_WORKER_NODES_FILE} \` -eq 1 ]; then
-        ${SPARK_ENV} ${SPARK_HOME}/sbin/start-slave.sh ${SPARK_MASTER}
+        ${SPARK_WORKER_ENV} ${SPARK_HOME}/sbin/start-slave.sh ${SPARK_MASTER}
     fi
 fi
 
@@ -219,12 +228,12 @@ if [ \${hostname}x != ${K_DRIVER_NODE}x -a \${hostname} != ${K_MASTER_NODE} ] ||
    [ \${hostname}x == ${K_MASTER_NODE}x -a ! -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 2 ] || \
    [ \${hostname}x == ${K_MASTER_NODE}x -a -z "${K_DRIVER_NODE}" -a ${NODES_NUBMER} -eq 1 ]; then
     if [ \`grep -c \${hostname} ${COMMON_DIR}/${K_WORKER_NODES_FILE} \` -eq 1 ]; then
-        ${SPARK_ENV} ${SPARK_HOME}/sbin/stop-slave.sh
+        ${SPARK_WORKER_ENV} ${SPARK_HOME}/sbin/stop-slave.sh
     fi
 fi
 
 if [ "\${hostname}" == "${K_MASTER_NODE}" ]; then
-    ${SPARK_ENV} ${SPARK_HOME}/sbin/stop-master.sh
+    ${SPARK_MASTER_ENV} ${SPARK_HOME}/sbin/stop-master.sh
 fi
 EOF
 chmod +x ${COMMON_DIR}/stop-spark.sh

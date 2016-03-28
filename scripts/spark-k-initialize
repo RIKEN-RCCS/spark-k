@@ -155,8 +155,7 @@ if [ \${hostname}x != ${K_DRIVER_NODE}x -a \${hostname}x != ${K_MASTER_NODE}x ] 
 fi
 
 if [ "\${hostname}" == "${K_MASTER_NODE}" ]; then
-   master_log="\${rankdir}/logs/\`ls -1tr \${rankdir}/logs | grep 'Master' | tail -n 1\`"
-   ${SPARK_K}spark-k-wait-initialize --node-num ${WORKERS_NUMBER} \${master_log}
+   ${SPARK_K}spark-k-wait-initialize --host ${K_MASTER_NODE} --node-num ${WORKERS_NUMBER}
 fi
 EOF
 chmod +x ${COMMON_DIR}/start-spark.sh

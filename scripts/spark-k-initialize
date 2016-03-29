@@ -84,6 +84,8 @@ else if [ -d /opt/local/spark ]; then
   SPARK_HOME=/opt/local/spark
 else if [ -d /opt/aics/spark ]; then
   SPARK_HOME=/opt/aics/spark
+else if [ -d ${COMMON_DIR}/${SPARK_ARCHIVE} ]; then
+  SPARK_HOME=${COMMON_DIR}/${SPARK_ARCHIVE}
 else if [ -f ./${SPARK_ARCHIVE}.tgz ]; then
   # Expects Spark tarball exists
   SPARK_HOME=${COMMON_DIR}/${SPARK_ARCHIVE}
@@ -99,7 +101,7 @@ else
     dir=`dirname ${spark_sumit}`
     SPARK_HOME=`(cd ${dir}; pwd)`
   fi
-fi; fi; fi; fi
+fi; fi; fi; fi; fi
 
 if [ -z "$SPARK_HOME" ]; then
   echo "Spark doesn't exists"

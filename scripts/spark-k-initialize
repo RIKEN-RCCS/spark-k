@@ -127,7 +127,7 @@ SPARK_MASTER_ENV="${SPARK_ENV} \
 SPARK_DAEMON_MEMORY=4g"
 
 # Spark environments those passed to Spark worker
-SPARK_WOKER_ENV="${SPARK_ENV} \
+SPARK_WORKER_ENV="${SPARK_ENV} \
 SPARK_DAEMON_MEMORY=1g"
 
 

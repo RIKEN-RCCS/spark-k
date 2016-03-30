@@ -33,8 +33,6 @@ class WaitCommand():
 
     __parser.add_argument('--interval', type=int, default=3)
 
-    __parser.add_argument('--retry-max-initial', type=int, default=3)
-
     __parser.add_argument('--retry-max', type=int, default=0)
 
     __parser.add_argument('--node-num', type=int, default=0)
@@ -92,28 +90,6 @@ class WaitCommand():
             args.host, args.port)
         req = urllib2.Request(url)
 
-        if args.retry_max_initial:
-            repeater = repeat(True, args.retry_max_initial)
-        else:
-            repeater = repeat(True)
-
-        response = None
-        for _ in repeater:
-            time.sleep(args.interval)
-            try:
-                response = urllib2.urlopen(req)
-            except urllib2.HTTPError as e:
-                LOG.warn('url "{}" is not available'.format(url))
-                continue
-            except urllib2.URLError, e:
-                LOG.warn('failed to open {}'.format(url))
-                continue
-            break
-        
-        if response is None:
-            LOG.error('failed to connect to the Master UI')
-            return 1
-
         if args.retry_max:
             repeater = repeat(True, args.retry_max)
         else:
@@ -123,11 +99,11 @@ class WaitCommand():
             try:
                 response = urllib2.urlopen(req)
             except urllib2.HTTPError as e:
-                LOG.error('url "{}" is not available'.format(url))
-                return 1
+                LOG.warn('url "{}" is not available'.format(url))
+                continue
             except urllib2.URLError, e:
-                LOG.error('failed to open {}'.format(url))
-                return 1
+                LOG.warn('failed to open {}'.format(url))
+                continue
             LOG.debug('status code is {}'.format(response.getcode()))
 
             body = response.read()

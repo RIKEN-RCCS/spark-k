@@ -78,38 +78,8 @@ cat << EOS > ${COMMON_DIR}/conf/spark-env.sh
 . /work/system/Env_base 1> /dev/null 2>&1
 EOS
 
-if [ -d /opt/spark ]; then
-  SPARK_HOME=/opt/spark
-else if [ -d /opt/local/spark ]; then
-  SPARK_HOME=/opt/local/spark
-else if [ -d /opt/aics/spark ]; then
-  SPARK_HOME=/opt/aics/spark
-else if [ -d ${COMMON_DIR}/${SPARK_ARCHIVE} ]; then
-  SPARK_HOME=${COMMON_DIR}/${SPARK_ARCHIVE}
-else if [ -f ./${SPARK_ARCHIVE}.tgz ]; then
-  # Expects Spark tarball exists
-  SPARK_HOME=${COMMON_DIR}/${SPARK_ARCHIVE}
-  if [ ! -d  ${SPARK_HOME} ]; then
-    tar zxf ${SPARK_ARCHIVE}.tgz
-    mv ${SPARK_ARCHIVE} ${COMMON_DIR}/ 
-  fi
-  SPARK_HOME=`(cd ${SPARK_HOME}; pwd)`
-else
-  # Expects spark-submit is in PATH
-  spark_submit=`which spark-submit 2> /dev/null`
-  if [ $? -eq 0 ]; then
-    dir=`dirname ${spark_sumit}`
-    SPARK_HOME=`(cd ${dir}; pwd)`
-  fi
-fi; fi; fi; fi; fi
-
-if [ -z "$SPARK_HOME" ]; then
-  echo "Spark doesn't exists"
-  exit 1
-fi
-
 # Spark configuration
-export SPARK_HOME
+export SPARK_HOME=/opt/aics/spark/spark-1.6.0-bin-sparkk
 export JAVA_HOME=/opt/klocal/openjdk7u45
 export PATH=${JAVA_HOME}/bin:$PATH
 export CLASSPATH=.:${JAVA_HOME}/jre/lib:${JAVA_HOME}/lib:${JAVA_HOME}/lib/tools.jar

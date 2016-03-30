@@ -1,0 +1,80 @@
+diff --git a/Makefile b/Makefile
+index 13838dc..14614e9 100644
+--- a/Makefile
++++ b/Makefile
+@@ -4,6 +4,10 @@ include Makefile.common
+ MVN:=mvn
+ SBT:=./sbt
+ 
++USE_GIT:=yes
++GIT_REPO_URL:=https://github.com/google/snappy.git
++GIT_SNAPPY_BRANCH:=1ff9be9b8fafc8528ca9e055646f5932aa5db9c4
++
+ all: snappy
+ 
+ SNAPPY_OUT:=$(TARGET)/$(snappy)-$(os_arch)
+@@ -40,14 +44,14 @@ $(SNAPPY_ARCHIVE):
+ $(SNAPPY_UNPACKED): $(SNAPPY_ARCHIVE)
+ 	$(TAR) xvfz $< -C $(TARGET)	
+ 	touch $@
+-	cd  $(SNAPPY_SRC_DIR) && ./configure
++       cd  $(SNAPPY_SRC_DIR) && ./configure --host=sparc64-unknown-linux-gnu
+ 
+ $(SNAPPY_GIT_UNPACKED):
+ 	@mkdir -p $(SNAPPY_SRC_DIR)
+ 	git clone $(GIT_REPO_URL) $(SNAPPY_SRC_DIR)
+ 	git --git-dir=$(SNAPPY_SRC_DIR)/.git --work-tree=$(SNAPPY_SRC_DIR) checkout -b local/snappy-$(GIT_SNAPPY_BRANCH) $(GIT_SNAPPY_BRANCH)
+ 	touch $@
+-	cd  $(SNAPPY_SRC_DIR) && ./autogen.sh && ./configure
++       cd  $(SNAPPY_SRC_DIR) && ./autogen.sh && ./configure --host=sparc64-unknown-linux-gnu
+ 
+ jni-header: $(SRC)/org/xerial/snappy/SnappyNative.h
+ 
+diff --git a/Makefile.common b/Makefile.common
+index e152b68..ae9b6f4 100755
+--- a/Makefile.common
++++ b/Makefile.common
+@@ -19,8 +19,10 @@ OSINFO_PROG := lib/org/xerial/snappy/OSInfo.class
+ #$(shell mkdir -p lib)
+ #$(shell $(JAVAC) src/main/java/org/xerial/snappy/OSInfo.java -d lib)
+ 
+-OS_NAME := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --os)
+-OS_ARCH := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --arch)
++#OS_NAME := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --os)
++#OS_ARCH := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --arch)
++OS_NAME:=Linux
++OS_ARCH:=sparcv9
+ LIB_FOLDER := $(shell $(JAVA) -cp lib $(OSINFO_CLASS))
+ IBM_JDK_LIB := lib/inc_ibm
+ 
+@@ -42,7 +44,7 @@ endif
+ 
+ # os=Default is meant to be generic unix/linux
+ 
+-known_os_archs := Linux-x86 Linux-x86_64 Linux-arm Linux-armhf Linux-ppc Linux-ppc64 Linux-s390 Linux-s390x Mac-x86 Mac-x86_64 FreeBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-x86 SunOS-sparc SunOS-x86_64 AIX-ppc AIX-ppc64
++known_os_archs := Linux-x86 Linux-x86_64 Linux-arm Linux-armhf Linux-ppc Linux-ppc64 Linux-s390 Linux-s390x Mac-x86 Mac-x86_64 FreeBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-x86 SunOS-sparc SunOS-x86_64 AIX-ppc AIX-ppc64 Linux-sparcv9
+ os_arch := $(OS_NAME)-$(OS_ARCH)
+ IBM_JDK_7 := $(findstring IBM, $(shell $(JAVA) -version 2>&1 | grep IBM | grep "JRE 1.7"))
+ 
+@@ -63,7 +65,7 @@ ifneq ($(IBM_JDK_7),)
+ endif
+ 
+ # cross-compilation toolchain prefix (e.g. "arm-linux-gnueabi-")
+-CROSS_PREFIX :=
++CROSS_PREFIX := sparc64-unknown-linux-gnu-
+ 
+ Default_CXX          := $(CROSS_PREFIX)g++
+ Default_STRIP        := $(CROSS_PREFIX)strip
+@@ -235,6 +237,12 @@ Windows-x86_64_LINKFLAGS    := -Wl,--kill-at -shared -static
+ Windows-x86_64_LIBNAME      := snappyjava.dll
+ Windows-x86_64_SNAPPY_FLAGS := 
+ 
++Linux-sparcv9_CXX       := $(CROSS_PREFIX)g++
++Linux-sparcv9_STRIP     := $(CROSS_PREFIX)strip
++Linux-sparcv9_CXXFLAGS  := -Ilib/inc_linux -I$(JAVA_HOME)/include -Ilib/inc_mac -O2 -KPIC -fvisibility=hidden -DHAVE_CONFIG_H
++Linux-sparcv9_LINKFLAGS := -shared -Wl,-z noexecstack
++Linux-sparcv9_LIBNAME   := libsnappyjava.so
++Linux-sparcv9_SNAPPY_FLAGS:= 
+ 
+ CXX        := $($(os_arch)_CXX)
+ STRIP     := $($(os_arch)_STRIP)

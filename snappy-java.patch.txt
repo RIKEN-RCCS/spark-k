@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 13838dc..14614e9 100644
+index 13838dc..a1e36ce 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -4,6 +4,10 @@ include Makefile.common
@@ -18,7 +18,7 @@ index 13838dc..14614e9 100644
  	$(TAR) xvfz $< -C $(TARGET)	
  	touch $@
 -	cd  $(SNAPPY_SRC_DIR) && ./configure
-+       cd  $(SNAPPY_SRC_DIR) && ./configure --host=sparc64-unknown-linux-gnu
++	cd  $(SNAPPY_SRC_DIR) && ./configure --host=sparc64-unknown-linux-gnu
  
  $(SNAPPY_GIT_UNPACKED):
  	@mkdir -p $(SNAPPY_SRC_DIR)
@@ -26,12 +26,12 @@ index 13838dc..14614e9 100644
  	git --git-dir=$(SNAPPY_SRC_DIR)/.git --work-tree=$(SNAPPY_SRC_DIR) checkout -b local/snappy-$(GIT_SNAPPY_BRANCH) $(GIT_SNAPPY_BRANCH)
  	touch $@
 -	cd  $(SNAPPY_SRC_DIR) && ./autogen.sh && ./configure
-+       cd  $(SNAPPY_SRC_DIR) && ./autogen.sh && ./configure --host=sparc64-unknown-linux-gnu
++	cd  $(SNAPPY_SRC_DIR) && ./autogen.sh && ./configure --host=sparc64-unknown-linux-gnu
  
  jni-header: $(SRC)/org/xerial/snappy/SnappyNative.h
  
 diff --git a/Makefile.common b/Makefile.common
-index e152b68..ae9b6f4 100755
+index e152b68..fc2b874 100755
 --- a/Makefile.common
 +++ b/Makefile.common
 @@ -19,8 +19,10 @@ OSINFO_PROG := lib/org/xerial/snappy/OSInfo.class
@@ -74,7 +74,7 @@ index e152b68..ae9b6f4 100755
 +Linux-sparcv9_CXXFLAGS  := -Ilib/inc_linux -I$(JAVA_HOME)/include -Ilib/inc_mac -O2 -KPIC -fvisibility=hidden -DHAVE_CONFIG_H
 +Linux-sparcv9_LINKFLAGS := -shared -Wl,-z noexecstack
 +Linux-sparcv9_LIBNAME   := libsnappyjava.so
-+Linux-sparcv9_SNAPPY_FLAGS:= 
++Linux-sparcv9_SNAPPY_FLAGS:=
  
  CXX        := $($(os_arch)_CXX)
  STRIP     := $($(os_arch)_STRIP)

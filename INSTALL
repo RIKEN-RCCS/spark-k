@@ -2,42 +2,12 @@
 
 ## Requsite softwares
 
- - python2.6
+ - python2.7
 
 ## INSTALL
 
 To install this packages, execute a following command.
-
- $ sudo python setup.py install
-
-This command installs:
-
- - Scripts into `/usr/bin/`
-
-To configure install path, use following commands.
-
- - --prefix 
-   installation prefix
-
- - --install-scripts
-   installation path of python scripts
-
-For example:
-
- $ python setup.py build
- $ mkdir -p ./tmp/lib/python2.6/site-packages/
- $ PYTHONPATH=./tmp/lib/python2.6/site-packages/ python setup.py install \
-   --prefix=./tmp --install-scripts=./tmp/local/bin
-
-This commands install a library into ./tmp/lib/python2.6/site-packages and
-scripts into ./tmp/local/bin.
-
-In this case, the enviroment variables need to be configured.
-Please add the following line into your .bashrc.
-
-  $ export PYTHONPATH=${PYTHONPATH}:${WORK}/tmp/lib/python2.6/site-packages
-  $ export PATH=${PATH}:${WORK}/tmp/local/bin
-
-* ${WORK} must specifiy the directory in that you executed the above exapmle.
-
-See 'python setup.py install --help' to more information.
+ 
+ # export PAHT=<path to python>:${PATH}
+ # python setup.py build
+ # cp build/scripts-2.7/* <path to install>

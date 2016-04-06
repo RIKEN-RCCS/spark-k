@@ -1,0 +1,21 @@
+#!/bin/sh
+
+#PJM --rsc-list "node=48"
+#PJM --rsc-list "elapse=00:30:00"
+#PJM --rsc-list "rscgrp=small"
+#PJM --mpi "use-rankdir"
+#PJM -s
+
+#PJM --stgin "rank=0 input.txt ../"
+#PJM --stgout-dir "rank=0 ../output.dir output.dir"
+#PJM --stg-transfiles "all"
+
+#PJM --stg-transfiles "all"
+
+# YourMainClass reads data from the path of first argument
+# and emits to the path of second argument
+spark-k-submit \
+    --class YourMainClass \
+    yourSparkApplication.jar \
+    ${COMMON_DIR}/input.txt \
+    ${COMMON_DIR/output.dir

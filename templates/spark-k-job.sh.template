@@ -12,6 +12,8 @@
 
 #PJM --stg-transfiles "all"
 
+export PATH=<path to install spark-k>:${PATH}
+
 # YourMainClass reads data from the path of first argument
 # and emits to the path of second argument
 spark-k \${SPARK_HOME}/bin/spark-submit \

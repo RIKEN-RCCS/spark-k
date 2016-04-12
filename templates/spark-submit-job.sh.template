@@ -10,8 +10,9 @@
 #PJM --stgout-dir "rank=0 ../output.dir output.dir"
 #PJM --stg-transfiles "all"
 
-. ${SPARK_K_PATH}/spark-k-initialize
+export PATH=<path to install spark-k>:${PATH}
 
+. ${SPARK_K_PATH}/spark-k-initialize
 
 # YourMainClass reads data from the path of first argument
 # and emits to the path of second argument

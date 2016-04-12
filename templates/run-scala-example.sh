@@ -6,15 +6,9 @@
 #PJM --mpi "use-rankdir"
 #PJM -s
 
-# Remove '#COMMENT OUT#' if yo
-#COMMENT_OUT#PJM --stgin "rank=0 ./spark-k-initialize 0:."
-#COMMENT_OUT#PJM --stgin "rank=0 ./spark-k-finalize 0:."
-#COMMENT_OUT#PJM --stgin "rank=0 ./spark-k-initialize 0:."
-#COMMENT_OUT#PJM --stgin "rank=0 ./spark-k-initialize 0:."
-
 #PJM --stg-transfiles "all"
 
-SPARK_K_PATH=.
+export PATH=<path to install spark-k>:${PATH}
 
 . ${SPARK_K_PATH}/spark-k-initialize
 

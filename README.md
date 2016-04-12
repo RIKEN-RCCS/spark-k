@@ -3,10 +3,10 @@ spark-k
 
 ## 1.  Introduction
 
-spark-k is utilities for Spark running on K computer, helps ordinary Spark
+spark-k is utility for Spark running on K computer, helps ordinary Spark
 cluster user to adapt Spark running on super computer specific environment.
 
-This section is mainly for Spark users on dedicated cluster environment.
+This document is mainly for Spark users on dedicated cluster environment.
 
 Compared to ordinary Spark cluster environment, super computers, including the K
 computer, differs in following characteristics:

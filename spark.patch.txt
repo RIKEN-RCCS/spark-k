@@ -1,0 +1,103 @@
+diff --git a/unsafe/src/main/java/org/apache/spark/unsafe/Platform.java b/unsafe/src/main/java/org/apache/spark/unsafe/Platform.java
+index 0d6b215..20c038a 100644
+--- a/unsafe/src/main/java/org/apache/spark/unsafe/Platform.java
++++ b/unsafe/src/main/java/org/apache/spark/unsafe/Platform.java
+@@ -65,12 +65,47 @@ public final class Platform {
+     _UNSAFE.putShort(object, offset, value);
+   }
+ 
++
++  static class PlatformLong {
++    long v = 0;
++  }
++
+   public static long getLong(Object object, long offset) {
+-    return _UNSAFE.getLong(object, offset);
++    if ((offset & 7L) == 0L) {
++      return _UNSAFE.getLong(object, offset);
++    } else {
++      try {
++        PlatformLong buf = new PlatformLong();
++        java.lang.reflect.Field f = buf.getClass().getDeclaredField("v");
++        long off = _UNSAFE.objectFieldOffset(f);
++        int h0 = _UNSAFE.getInt(object, offset);
++        int h1 = _UNSAFE.getInt(object, (offset + 4));
++        _UNSAFE.putInt(buf, off, h0);
++        _UNSAFE.putInt(buf, (off + 4), h1);
++        return buf.v;
++      } catch (NoSuchFieldException x) {
++        throw new Error(x);
++      }
++    }
+   }
+ 
+   public static void putLong(Object object, long offset, long value) {
+-    _UNSAFE.putLong(object, offset, value);
++    if ((offset & 7L) == 0L) {
++      _UNSAFE.putLong(object, offset, value);
++    } else {
++      try {
++        PlatformLong buf = new PlatformLong();
++        java.lang.reflect.Field f = buf.getClass().getDeclaredField("v");
++        long off = _UNSAFE.objectFieldOffset(f);
++        buf.v = value;
++        int h0 = _UNSAFE.getInt(buf, off);
++        int h1 = _UNSAFE.getInt(buf, (off + 4));
++        _UNSAFE.putInt(object, offset, h0);
++        _UNSAFE.putInt(object, (offset + 4), h1);
++      } catch (NoSuchFieldException x) {
++        throw new Error(x);
++      }
++    }
+   }
+ 
+   public static float getFloat(Object object, long offset) {
+@@ -81,12 +116,46 @@ public final class Platform {
+     _UNSAFE.putFloat(object, offset, value);
+   }
+ 
++  static class PlatformDouble {
++    double v = 0;
++  }
++
+   public static double getDouble(Object object, long offset) {
+-    return _UNSAFE.getDouble(object, offset);
++    if ((offset & 7L) == 0L) {
++      return _UNSAFE.getDouble(object, offset);
++    } else {
++      try {
++        PlatformDouble buf = new PlatformDouble();
++        java.lang.reflect.Field f = buf.getClass().getDeclaredField("v");
++        long off = _UNSAFE.objectFieldOffset(f);
++        int h0 = _UNSAFE.getInt(object, offset);
++        int h1 = _UNSAFE.getInt(object, (offset + 4));
++        _UNSAFE.putInt(buf, off, h0);
++        _UNSAFE.putInt(buf, (off + 4), h1);
++        return buf.v;
++      } catch (NoSuchFieldException x) {
++        throw new Error(x);
++      }
++    }
+   }
+ 
+   public static void putDouble(Object object, long offset, double value) {
+-    _UNSAFE.putDouble(object, offset, value);
++    if ((offset & 7L) == 0L) {
++      _UNSAFE.putDouble(object, offset, value);
++    } else {
++      try {
++        PlatformDouble buf = new PlatformDouble();
++        java.lang.reflect.Field f = buf.getClass().getDeclaredField("v");
++        long off = _UNSAFE.objectFieldOffset(f);
++        buf.v = value;
++        int h0 = _UNSAFE.getInt(buf, off);
++        int h1 = _UNSAFE.getInt(buf, (off + 4));
++        _UNSAFE.putInt(object, offset, h0);
++        _UNSAFE.putInt(object, (offset + 4), h1);
++      } catch (NoSuchFieldException x) {
++        throw new Error(x);
++      }
++    }
+   }
+ 
+   public static Object getObjectVolatile(Object object, long offset) {

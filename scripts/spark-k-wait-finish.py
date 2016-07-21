@@ -84,10 +84,12 @@ class WaitCommand():
                 LOG.error('No applications information.')
                 return 1
 
-            LOG.debug('Master response: {}.'.format(applications))
-            n = ([any(attempt.get('completed', False)
-                      for attempt in app['attempts'])
-                  for app in applications]).count(False)
+            ##LOG.debug('Master response: {}.'.format(applications))
+            # (sum flattens list of lists).
+            completeds = sum([[attempt.get('completed', False)
+                                  for attempt in app['attempts']]
+                                 for app in applications], [])
+            n = completeds.count(False)
             if n == 0:
                 LOG.debug('All applications completed.')
                 return 0

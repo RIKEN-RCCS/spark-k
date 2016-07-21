@@ -8,11 +8,10 @@
 #PJM --rsc-list "elapse=00:03:00"
 #PJM --mpi "use-rankdir"
 #PJM -S
-#PJM --stgout "./spark.conf/* ./%n.z%j/"
 #PJM --stgout "rank=* %r:./spark.logs/* ./%n.z%j/"
 #PJM --stg-transfiles "all"
 
-. /work/system/Env_base
+. /work/system/Env_base > /dev/null
 
 k_scripts=/opt/aics/spark/scripts/
 . ${k_scripts}/spark-k-config.sh

@@ -98,7 +98,7 @@ class WaitCommand():
                 continue
             LOG.debug('Master response: code={}.'.format(response.getcode()))
             body = response.read()
-            #LOG.debug('Master response: {}.'.format(body))
+            ##LOG.debug('Master response: {}.'.format(body))
             try:
                 nworkers = cls.get_alive_workers_field_from_response(body)
             except ValueError, e:

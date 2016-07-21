@@ -13,10 +13,10 @@ k_scripts=/opt/aics/spark/scripts
 
 hostname=`hostname`
 
-if (grep "${hostname}" ${k_worker_nodes_file}); then
-    ${SPARK_HOME}/sbin/stop-slave.sh
+if (grep "${hostname}" "${k_worker_nodes_file}" >/dev/null); then
+    ${SPARK_HOME}/sbin/stop-slave.sh 1>&2
 fi
 
-if [ "${hostname}" == "${k_master_node}" ]; then
-    ${SPARK_HOME}/sbin/stop-master.sh
+if [ "${hostname}" = "${k_master_node}" ]; then
+    ${SPARK_HOME}/sbin/stop-master.sh 1>&2
 fi

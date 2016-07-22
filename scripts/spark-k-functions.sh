@@ -8,14 +8,15 @@ k_n_workers=
 
 # (spark_k_setup) Generates host-list files.  It determines the nodes
 # for a master and workers, and generates two host-list files and a
-# setting file.  One of the host-list files consists of a list of
-# workers.  A setting file contains variables "${k_master_node}",
-# "${k_master_url}", and "${k_n_workers}".  It assigns a single master
-# and (nprocs-1) workers.  Optional first argument limits the number
-# of nodes.  Note that the files are created in "${PJM_JOBDIR}", which
-# points to a so-called "shared"-directory (it is one up from a
-# "rank"-directory) and accessible from all ranks.  It is called by
-# the main job script (a single process).
+# setting file.  One host-list file consists of a list of workers and
+# the other consists of all nodes.  A setting file contains variables
+# "${k_master_node}", "${k_master_url}", and "${k_n_workers}".  It
+# assigns a single master and (nprocs-1) workers.  Optional first
+# argument limits the number of nodes.  Note that the files are
+# created in "${PJM_JOBDIR}", which points to a so-called
+# "shared"-directory (it is one up from a "rank"-directory) and
+# accessible from all ranks.  It is called by the main job script (a
+# single process).
 
 spark_k_setup() {
     # Make a "conf" directory.
@@ -37,8 +38,9 @@ spark_k_setup() {
     k_master_node="${hostname}"
     k_master_url="spark://${k_master_node}:7077"
 
-    k_n_nodes=`wc -l < ${k_nodes_file} 2> /dev/null`
     grep -v -e "${k_master_node}" < ${k_nodes_file} > ${k_worker_nodes_file}
+
+    k_n_nodes=`wc -l < ${k_nodes_file} 2> /dev/null`
     k_n_workers=`wc -l < ${k_worker_nodes_file} 2> /dev/null`
 
     if [ "${k_n_workers}" -le 0 ]; then

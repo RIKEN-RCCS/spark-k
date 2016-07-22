@@ -2,8 +2,8 @@
 
 """
 Command to wait until all workers join to a master.  It returns 0, or
-1 on error.  It checks responses from http UI.  It retries for 120
-seconds by default.
+1 on error.  It checks responses from HTTP UI (http://master:8080/).
+It retries for 120 seconds by default.
 """
 
 import sys
@@ -14,9 +14,10 @@ import logging
 import itertools
 import xml.etree.ElementTree as ET
 
-FORMAT = '%(levelname)s: %(message)s'
+
+FORMAT = '%(filename)s-%(levelname)s: %(message)s'
 logging.basicConfig(format=FORMAT)
-LOG = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class WaitCommand():
@@ -25,8 +26,7 @@ class WaitCommand():
     __parser = argparse.ArgumentParser()
     __parser.add_argument('workers', type=int,
                           help='number of workers to wait')
-    __parser.add_argument('--debug',
-                          action='store_true',
+    __parser.add_argument('--terse', action='store_true',
                           help=argparse.SUPPRESS)
     __parser.add_argument('--host', type=str, default='localhost')
     __parser.add_argument('--port', type=int, default=8080)
@@ -37,15 +37,14 @@ class WaitCommand():
     def __parse_args(cls):
         """ Parses arguments. """
 
-        PORT_MAX = 65535
         args = cls.__parser.parse_args(sys.argv[1:])
         if args.port < 0:
             cls.__parser.error('port is too small')
-        if args.port > PORT_MAX:
+        if args.port > 65535:
             cls.__parser.error('port is too large')
         if args.retrys < 0:
             cls.__parser.error('retrys should be positive')
-	args.debug = True
+        args.terse = False
         return args
 
     @classmethod
@@ -59,12 +58,13 @@ class WaitCommand():
         elems = filter(lambda x: len(x) > 0 and x[0].text == 'Alive Workers:',
                        elems0)
         if len(elems) == 0:
-            LOG.warn('No Alive Workers field.')
+            logger.warning('No Alive Workers field.')
             return 0
         elif len(elems[0]) == 0:
             raise Error('(never)')
         elif not elems[0][0].tail.strip().isdigit():
-            LOG.error('Bad Alive Workers field: {}.'.format(elems[0][0].text))
+            logger.error('Bad Alive Workers field: {}.'
+                         .format(elems[0][0].text))
             raise ValueError('Bad Alive Workers field.')
         else:
             return int(elems[0][0].tail)
@@ -75,13 +75,16 @@ class WaitCommand():
 
         args = cls.__parse_args()
 
-        if args.debug:
-            LOG.setLevel(logging.DEBUG)
+        if args.terse:
+            logger.setLevel(logging.WARNING)
+        else:
+            logger.setLevel(logging.INFO)
 
         url = 'http://{}:{}/'.format(args.host, args.port)
         req = urllib2.Request(url)
 
-        LOG.debug('Wait for workers to join: workers={}.'.format(args.workers))
+        logger.info('Wait for workers to join: workers={}.'
+                    .format(args.workers))
         if args.retrys == 0:
             repeater = itertools.repeat(True)
         else:
@@ -89,30 +92,30 @@ class WaitCommand():
         for _ in repeater:
             try:
                 response = urllib2.urlopen(req)
-            except urllib2.URLError, e:
-                LOG.error('Bad url "{}".'.format(url))
+            except urllib2.URLError as e:
+                logger.error('Bad connection: {}.'.format(str(e)))
                 return 1
             except urllib2.HTTPError as e:
-                LOG.warn('Bad connection: {}.'.format(str(e)))
+                logger.warning('Bad response: {}.'.format(str(e)))
                 time.sleep(args.interval)
                 continue
-            LOG.debug('Master response: code={}.'.format(response.getcode()))
+            logger.info('Master response: code={}.'.format(response.getcode()))
             body = response.read()
-            ##LOG.debug('Master response: {}.'.format(body))
+            ##logger.debug('Master response: {}.'.format(body))
             try:
                 nworkers = cls.get_alive_workers_field_from_response(body)
-            except ValueError, e:
-                LOG.error('Bad response from url "{}".'.format(url))
-                LOG.exception(e)
+            except ValueError as e:
+                logger.error('Bad response: {}.'.format(str(e)))
+                logger.exception(e)
                 return 1
 
-            LOG.debug('Current workers: workers={}.'.format(nworkers))
+            logger.info('Current workers: workers={}.'.format(nworkers))
             if nworkers >= args.workers:
-                LOG.debug('All expected workers joined to master.')
+                logger.info('All expected workers joined to master.')
                 return 0
             time.sleep(args.interval)
-        LOG.error('Retry limit reached.')
-	return 1
+        logger.error('Retry limit reached.')
+        return 1
 
 
 if __name__ == '__main__':

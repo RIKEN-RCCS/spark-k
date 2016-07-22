@@ -34,8 +34,9 @@ export LD_LIBRARY_PATH=${PYTHON_HOME}/lib:${LD_LIBRARY_PATH}
 
 # R configuration.
 
-export R_HOME=/opt/aics/R
-export PATH=${R_HOME}/bin:$PATH
+#export R_HOME=/opt/aics/R
+k_r_home=/opt/aics/R
+export PATH=${k_r_home}/bin:$PATH
 
 # Setting files for a job.
 

@@ -2,21 +2,22 @@
 
 # Simple scripts for running Spark.  Source this file.
 
-k_master_node=
-k_master_url=
-k_n_workers=
+export k_master_node=
+export k_master_url=
+export k_n_workers=
 
 # (spark_k_setup) Generates host-list files.  It determines the nodes
 # for a master and workers, and generates two host-list files and a
-# setting file.  One host-list file consists of a list of workers and
-# the other consists of all nodes.  A setting file contains variables
-# "${k_master_node}", "${k_master_url}", and "${k_n_workers}".  It
-# assigns a single master and (nprocs-1) workers.  Optional first
-# argument limits the number of nodes.  Note that the files are
-# created in "${PJM_JOBDIR}", which points to a so-called
-# "shared"-directory (it is one up from a "rank"-directory) and
-# accessible from all ranks.  It is called by the main job script (a
-# single process).
+# setting file.  One host-list file consists of all nodes and the
+# other consists of worker nodes.  It assigns a single master and
+# (nprocs-1) workers.  Optional first argument limits the number of
+# nodes.  A setting file contains variables "${k_master_node}",
+# "${k_master_url}", and "${k_n_workers}".  The variables are
+# environment-exported to be accessible from Python, etc.  Note that
+# the files are created in "${PJM_JOBDIR}", which points to a
+# so-called "shared"-directory (it is one up from a "rank"-directory)
+# and accessible from all ranks.  It is called by the main job script
+# (a single process).
 
 spark_k_setup() {
     # Make a "conf" directory.
@@ -52,9 +53,9 @@ spark_k_setup() {
     cat <<EOF > ${k_settings_file}
 #!/bin/bash
 # Settings of a Spark run.  Source this file.
-k_master_node=${k_master_node}
-k_master_url=${k_master_url}
-k_n_workers=${k_n_workers}
+export k_master_node=${k_master_node}
+export k_master_url=${k_master_url}
+export k_n_workers=${k_n_workers}
 EOF
 }
 

@@ -2,10 +2,6 @@
 
 # Simple scripts for running Spark.  Source this file.
 
-export k_master_node=
-export k_master_url=
-export k_n_workers=
-
 # (spark_k_setup) Generates host-list files.  It determines the nodes
 # for a master and workers, and generates two host-list files and a
 # setting file.  One host-list file consists of all nodes and the
@@ -36,13 +32,13 @@ spark_k_setup() {
     # Determine the rank0 for a master and the rest for the workers.
 
     hostname=`hostname`
-    k_master_node="${hostname}"
-    k_master_url="spark://${k_master_node}:7077"
+    export k_master_node="${hostname}"
+    export k_master_url="spark://${k_master_node}:7077"
 
     grep -v -e "${k_master_node}" < ${k_nodes_file} > ${k_worker_nodes_file}
 
     k_n_nodes=`wc -l < ${k_nodes_file} 2> /dev/null`
-    k_n_workers=`wc -l < ${k_worker_nodes_file} 2> /dev/null`
+    export k_n_workers=`wc -l < ${k_worker_nodes_file} 2> /dev/null`
 
     if [ "${k_n_workers}" -le 0 ]; then
         echo "warning: Number of workers 0." 1>&2

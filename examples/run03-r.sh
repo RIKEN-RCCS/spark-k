@@ -1,14 +1,14 @@
 #!/bin/sh -x
 
-# Runs ml.R in the examples, with 12 nodes (1 master + 12 workers),
-# using "rank"-directory.
+# Runs two R examples, with 12 nodes (1 master + 11 workers), using
+# "rank"-directories.
 
 #PJM --rsc-list "rscgrp=small"
 #PJM --rsc-list "node=12"
 #PJM --rsc-list "elapse=00:10:00"
 #PJM --mpi "use-rankdir"
 #PJM -S
-#PJM --stgout "./spark.conf/* ./%n.z%j/"
+#PJM --stgout "rank=0 0:../spark.conf/* ./%n.z%j/"
 #PJM --stgout "rank=* %r:./spark.logs/* ./%n.z%j/"
 #PJM --stg-transfiles "all"
 
@@ -21,8 +21,19 @@ k_scripts=/opt/aics/spark/scripts/
 spark_k_setup
 spark_k_start_all
 
+(sleep 5; echo ""; echo "*** RUNNING ML.R... ***"; echo "")
+
 ${SPARK_HOME}/bin/sparkR \
     --master "${k_master_url}" \
     ${SPARK_HOME}/examples/src/main/r/ml.R
 
+(sleep 5; echo ""; echo "*** RUNNING DATAFRAME.R... ***"; "echo "")
+
+${SPARK_HOME}/bin/spark-submit \
+    --master "${k_master_url}" \
+    ${SPARK_HOME}/examples/src/main/r/dataframe.R
+
 spark_k_stop_all
+#spark_k_clean
+
+sleep 20

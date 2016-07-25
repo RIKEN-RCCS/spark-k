@@ -77,7 +77,7 @@ RESTART_SPARK_CLUSTER = RESTART_SPARK_CLUSTER and not IS_YARN_MODE
 RSYNC_SPARK_HOME = True
 
 # Which tests to run
-RUN_SPARK_TESTS = True
+RUN_SPARK_TESTS = False
 RUN_PYSPARK_TESTS = False
 RUN_STREAMING_TESTS = False
 RUN_MLLIB_TESTS = False
@@ -142,7 +142,7 @@ IGNORED_TRIALS = 2
 # Java options.
 COMMON_JAVA_OPTS = [
     # Fraction of JVM memory used for caching RDDs.
-    JavaOptionSet("spark.storage.memoryFraction", [0.66]),
+    #JavaOptionSet("spark.storage.memoryFraction", [0.66]),
     JavaOptionSet("spark.serializer", ["org.apache.spark.serializer.JavaSerializer"]),
     # JavaOptionSet("spark.executor.memory", ["9g"]),
     # Turn event logging on in order better diagnose failed tests. Off by default as it crashes

@@ -1,7 +1,7 @@
 #!/bin/sh -x
 
-# Runs JavaSparkPi in the examples, with 12 nodes (1 master + 12
-# workers), using "rank"-directory.
+# Runs JavaSparkPi in the examples, with 12 nodes (1 master + 11
+# workers), using "rank"-directories.
 
 #PJM --rsc-list "rscgrp=small"
 #PJM --rsc-list "node=12"
@@ -27,3 +27,5 @@ ${SPARK_HOME}/bin/spark-submit \
     ${SPARK_HOME}/lib/spark-examples-1.6.2-hadoop2.2.0.jar
 
 spark_k_stop_all
+
+sleep 20

@@ -1,5 +1,6 @@
-Scripts and Examples for Apache Spark on K
-==========================================
+[](-*-Mode: Fundamental; Coding: us-ascii;-*-)
+
+# Scripts and Examples for Apache Spark on K
 
 This package provides utility scripts and examples for running [Apache
 Spark](http://spark.apache.org/) on [K

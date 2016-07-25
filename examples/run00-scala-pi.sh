@@ -1,7 +1,7 @@
 #!/bin/sh -x
 
-# Runs Sacla SparkPi in the examples, with 12 nodes (1 master + 12
-# workers), using "rank"-directory.
+# Runs Sacla SparkPi in the examples, with 12 nodes (1 master + 11
+# workers), using "rank"-directories.
 
 #PJM --rsc-list "rscgrp=small"
 #PJM --rsc-list "node=12"
@@ -27,3 +27,5 @@ ${SPARK_HOME}/bin/spark-submit \
 
 spark_k_stop_all
 spark_k_clean
+
+sleep 20

@@ -48,7 +48,9 @@ IS_MESOS_MODE = "mesos" in SPARK_CLUSTER_URL
 USE_CLUSTER_SPARK = True
 
 # URL of the HDFS installation in the Spark EC2 cluster
-HDFS_URL = "hdfs://%s:9000/test/" % socket.gethostname()
+#HDFS_URL = "hdfs://%s:9000/test/" % socket.gethostname()
+HDFS_URL = "{}/test/".format(os.environ["PJM_JOBDIR"])
+
 
 # Set the following if not using existing Spark installation
 # Commit id and repo used if you are not using an existing Spark cluster
@@ -125,7 +127,8 @@ PYTHON_MLLIB_OUTPUT_FILENAME = "results/python_mllib_perf_output_%s_%s" % (
 # number of records in a generated dataset) if you are running the tests with more
 # or fewer nodes. When developing new test suites, you might want to set this to a small
 # value suitable for a single machine, such as 0.001.
-SCALE_FACTOR = 1.0
+#SCALE_FACTOR = 1.0
+SCALE_FACTOR = 0.5
 
 assert SCALE_FACTOR > 0, "SCALE_FACTOR must be > 0."
 
@@ -168,9 +171,11 @@ COMMON_OPTS = [
 # operations on key-value data.
 SPARK_KEY_VAL_TEST_OPTS = [
     # The number of input partitions.
-    OptionSet("num-partitions", [400], can_scale=True),
+    #OptionSet("num-partitions", [400], can_scale=True),
+    OptionSet("num-partitions", [100], can_scale=True),
     # The number of reduce tasks.
-    OptionSet("reduce-tasks", [400], can_scale=True),
+    #OptionSet("reduce-tasks", [400], can_scale=True),
+    OptionSet("reduce-tasks", [100], can_scale=True),
     # A random seed to make tests reproducable.
     OptionSet("random-seed", [5]),
     # Input persistence strategy (can be "memory", "disk", or "hdfs").
@@ -193,8 +198,7 @@ SPARK_KEY_VAL_TEST_OPTS = [
     # Use hashes instead of padded numbers for keys and values
     FlagSet("hash-records", [False]),
     # Storage location if HDFS persistence is used
-    OptionSet("storage-location", [
-        HDFS_URL + "/spark-perf-kv-data"])
+    OptionSet("storage-location", [HDFS_URL + "/spark-perf-kv-data"])
 ]
 
 

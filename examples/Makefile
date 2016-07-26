@@ -29,6 +29,10 @@ spark-perf-build::
 spark-perf.tz::
 	tar zcf spark-perf.tz $(PERFFILES)
 
+spark-perf-config.diff::
+	diff -u spark-perf-master/config/config.py.template \
+		spark-perf-config-basic.py > spark-perf-config.diff; true
+
 veryclean::
 	mv run??-*.sh.[eioswz][0-9]* tmp/
 	#rm -f run??-*.sh.[eioswz][0-9]*

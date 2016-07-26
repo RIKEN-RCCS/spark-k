@@ -80,6 +80,18 @@ ones.
 * RUN_MLLIB_TESTS = True/False
 * RUN_PYTHON_MLLIB_TESTS = True/False
 
+## spark-perf "SPARK_TESTS"
+
+* Reduce "SCALE_FACTOR" from 1.0 to 0.5.  It allows to run
+"scala-agg-by-key" failed with "java.lang.OutOfMemoryError: GC
+overhead limit exceeded".
+
+* Set nprocs=12.  Reduce "num-partitions" and "reduce-tasks" from 400
+to 100.  "scala-agg-by-key-naive" failed with
+"java.io.FileNotFoundException: (Too many open files)"
+
+NUM_PARTITIONS for "num-partitions"
+
 ## Notes on spark-perf-config-basic.py
 
 * Option "spark.storage.memoryFraction" is said to be deprecated.

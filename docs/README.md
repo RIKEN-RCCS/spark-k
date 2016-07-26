@@ -2,8 +2,9 @@
 
 # BUILD AND INSTALL
 
+The install documents describes procedures building R and Spark on K.
 Spark is installed in "/opt/aics/spark", and R is installed in
-"/opt/aics/R". They are built with the following procedures.
+"/opt/aics/R".  They are built with the following procedures.
 
 Brief procedures:
 

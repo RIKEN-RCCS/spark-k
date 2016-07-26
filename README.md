@@ -7,14 +7,12 @@ for running [Apache Spark](http://spark.apache.org/) on [K
 Computer](http://www.aics.riken.jp/en/k-computer/about/).  It also
 includes simple examples.
 
-* The installation documentation is in docs.  See [README in
-docs](docs/README.md).
+* The installation documentation is in docs.  See [docs](docs).
 
-* The utility scripts are in scripts.  See [README in
-scripts](scripts/README.md).
+* The utility scripts are in scripts.  See [scripts](scripts).
 
-* The examples are provided as job scripts for Fujitsu job manager.
-They are in examples.  See [README in examples](examples/README.md)
+* The examples are in examples. See [examples](examples).  They are
+provided as job scripts for Fujitsu job manager.
 
 It assumes Spark is already installed in
 "/opt/aics/spark/spark-1.6.2-bin-sparkk" and the scripts are in
@@ -42,8 +40,7 @@ First try the sample job scripts (for Fujitsu job manager) in the
 
 ## Building Spark
 
-For build and install procedures, see [README in
-docs](docs/README.md).  Also, see
+For build and install procedures, see [docs](docs).  Also, see
 [wiki](https://github.com/pf-aics-riken/spark-k/wiki).
 
 ## More Information

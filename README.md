@@ -13,5 +13,6 @@ It assumes Spark is already installed in
 "/opt/aics/spark/spark-1.x.x-bin-sparkk" and the scripts are in
 "/opt/aics/spark/scripts/".
 
-For build and install procedures and the descriptions of the
-scripts, see [wiki](https://github.com/pf-aics-riken/spark-k/wiki).
+For build and install procedures and the descriptions of the scripts,
+see [README](docs/README.md).  Or see
+[wiki](https://github.com/pf-aics-riken/spark-k/wiki).

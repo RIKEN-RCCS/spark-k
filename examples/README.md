@@ -40,6 +40,15 @@ It generates a warning: "WARN TaskSetManager: Stage 0 contains a task
 of very large size (648 KB). The maximum recommended task size is 100
 KB".
 
+## Notes on run10-simpleapp.sh
+
+Build procedures: The following run MVN for Java and SBT for Scala.
+
+* cd java; make
+* cd scala; make
+
+Note SimpleAPp in Python does not launch wokers.
+
 ## Building Spark-Perf
 
 Download the package.

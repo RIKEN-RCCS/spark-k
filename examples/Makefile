@@ -7,7 +7,17 @@ PERFFILES += $(PERF)/streaming-tests/target/streaming-perf-tests-assembly.jar
 PERFFILES += $(PERF)/mllib-tests/target/mllib-perf-tests-assembly.jar
 PERFFILES += $(PERF)/pyspark-tests/*.py
 
-.PHONY: spark-perf-download spark-perf-build data-manipulation-downloads
+.PHONY: spark-perf-download spark-perf-build data-manipulation-downloads \
+	simpleapps
+
+data-manipulation-downloads::
+	wget -O commons-csv-1.1.jar http://search.maven.org/remotecontent?filepath=org/apache/commons/commons-csv/1.1/commons-csv-1.1.jar
+	wget -O spark-csv_2.11-1.0.3.jar http://search.maven.org/remotecontent?filepath=com/databricks/spark-csv_2.11/1.0.3/spark-csv_2.11-1.0.3.jar
+	wget http://s3-us-west-2.amazonaws.com/sparkr-data/flights.csv
+
+simpleapps:
+	cd java; make
+	cd scala; make
 
 spark-perf-download::
 	wget https://github.com/databricks/spark-perf/archive/master.zip
@@ -18,11 +28,6 @@ spark-perf-build::
 
 spark-perf.tz::
 	tar zcf spark-perf.tz $(PERFFILES)
-
-data-manipulation-downloads::
-	wget -O commons-csv-1.1.jar http://search.maven.org/remotecontent?filepath=org/apache/commons/commons-csv/1.1/commons-csv-1.1.jar
-	wget -O spark-csv_2.11-1.0.3.jar http://search.maven.org/remotecontent?filepath=com/databricks/spark-csv_2.11/1.0.3/spark-csv_2.11-1.0.3.jar
-	wget http://s3-us-west-2.amazonaws.com/sparkr-data/flights.csv
 
 veryclean::
 	mv run??-*.sh.[eioswz][0-9]* tmp/

@@ -5,6 +5,22 @@
 These scripts are utility to ease using Apache Spark on K.  The
 scripts are installed in "/opt/aics/spark/scripts" on K.
 
+## Install
+
+Download scripts for K.
+
+    $ git clone https://github.com/pf-aics-riken/spark-k
+
+Copy the scripts on the compute-node (an interactive run).
+
+    $ cd spark-k
+    $ mkdir /opt/aics/spark/scripts
+    $ cp -p scripts/* /opt/aics/spark/scripts
+
+> Prepare Python package "setuptools".  The downloaded files are
+installed in "${HOME}/.local/lib/python2.6/".
+>    $ wget https://bootstrap.pypa.io/ez_setup.py -O - | python - --user
+
 # (2016-07-20) MEMO on Environment Variables
 
 * SPARK_MASTER

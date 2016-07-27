@@ -128,7 +128,7 @@ PYTHON_MLLIB_OUTPUT_FILENAME = "results/python_mllib_perf_output_%s_%s" % (
 # or fewer nodes. When developing new test suites, you might want to set this to a small
 # value suitable for a single machine, such as 0.001.
 #SCALE_FACTOR = 1.0
-SCALE_FACTOR = 0.5
+SCALE_FACTOR = 0.1
 
 assert SCALE_FACTOR > 0, "SCALE_FACTOR must be > 0."
 
@@ -147,7 +147,8 @@ COMMON_JAVA_OPTS = [
     # Fraction of JVM memory used for caching RDDs.
     #JavaOptionSet("spark.storage.memoryFraction", [0.66]),
     JavaOptionSet("spark.serializer", ["org.apache.spark.serializer.JavaSerializer"]),
-    # JavaOptionSet("spark.executor.memory", ["9g"]),
+    JavaOptionSet("spark.executor.memory", ["8g"]),
+    JavaOptionSet("spark.executor.cores", ["4"]),
     # Turn event logging on in order better diagnose failed tests. Off by default as it crashes
     # releases prior to 1.0.2
     # JavaOptionSet("spark.eventLog.enabled", [True]),
@@ -171,11 +172,9 @@ COMMON_OPTS = [
 # operations on key-value data.
 SPARK_KEY_VAL_TEST_OPTS = [
     # The number of input partitions.
-    #OptionSet("num-partitions", [400], can_scale=True),
-    OptionSet("num-partitions", [100], can_scale=True),
+    OptionSet("num-partitions", [400], can_scale=True),
     # The number of reduce tasks.
-    #OptionSet("reduce-tasks", [400], can_scale=True),
-    OptionSet("reduce-tasks", [100], can_scale=True),
+    OptionSet("reduce-tasks", [400], can_scale=True),
     # A random seed to make tests reproducable.
     OptionSet("random-seed", [5]),
     # Input persistence strategy (can be "memory", "disk", or "hdfs").
@@ -198,7 +197,8 @@ SPARK_KEY_VAL_TEST_OPTS = [
     # Use hashes instead of padded numbers for keys and values
     FlagSet("hash-records", [False]),
     # Storage location if HDFS persistence is used
-    OptionSet("storage-location", [HDFS_URL + "/spark-perf-kv-data"])
+    OptionSet("storage-location", [
+        HDFS_URL + "/spark-perf-kv-data"])
 ]
 
 

@@ -1,4 +1,4 @@
-[](-*-Mode: Fundamental; Coding: us-ascii;-*-)
+<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
 
 # Utility Scripts for Apache Spark on K
 

@@ -1,4 +1,4 @@
-(-*-Mode: Fundamental; Coding: us-ascii;-*-)
+<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
 
 # Spark on K Build Procedure -- Update (2016-07-17)
 

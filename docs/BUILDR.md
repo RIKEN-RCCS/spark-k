@@ -1,4 +1,4 @@
-[](-*-Mode: Fundamental; Coding: us-ascii;-*-)
+<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
 
 # Build R
 

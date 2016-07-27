@@ -1,116 +1,93 @@
-spark-k
-=======
+<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
+
+# Running Spark on K
+==================
 
 ## 1.  Introduction
 
-spark-k is a utility for Spark running on K computer, helps ordinary Spark
-cluster user to adapt Spark running on super computer specific environment.
+The "spark-k" package is a utility for Spark running on K computer,
+This document aims at Spark users of an ordinary clusters.
 
-This document is mainly for Spark users on dedicated cluster environment.
+Compared to an ordinary cluster environment, K computer differs in
+following characteristics:
 
-Compared to ordinary Spark cluster environment, super computers, including the K
-computer, differs in following characteristics:
+* Jobs are under the control of a job-scheduler.
 
-* All the nodes which consist an computing environment is temporarily allocated
-  for a job. Users request # of nodes to use for a job at a time.
+* The working storage is "staged".  The working set files must be
+copied in from the permanent storage system to the working storage
+system by "stage-in", and results must be copied out by "stage-out".
 
-* Technically there is no persistent storage. Users must "stage in" the needed
-  input files into specific locations (in many cases it is the current working
-  directory of the job) and "stage out" the desired result files.
+* Processes on the allocated node must be started by the "mpiexec"
+command provided in MPI (Message Passing Interface).
 
-* The allocated nodes have a rank number, which is defined by the MPI manner. If
-  a user request 32 nodes environment, all the nodes have its own unique rank
-  number, 0 to 31. All the nodes are only specifiable/recognized by the rank
-  number, not by hostname/IP address in the temporary node set.
+## 2. Writing a Job Script
 
-If a user want to run a Spark job in such an environment, the user must write
-the following steps into a job script:
+A job script is in the form a shell script (bash).  The user needs to
+write the following steps in her job script:
 
-1. Request to allocate desired # of the nodes with the environment specific
-   manner/command to the resource management module.
+1. Specify a request of the number of the nodes.
 
-2. "Stage in" input files with the environment specific manner/command.
+2. Specify the input files for stage-in.
 
-3. Launch a Spark master.
+3. Start a master.
 
-4. Launch Spark workers.
+4. Start workers.
 
 5. Wait for all the workers are registered into the master.
 
-6. Launch a Spark job by spark-submit.
+6. Launch some jobs by spark-submit.
 
-7. Wait for the Spark job finish.
+7. Wait for the jobs finish (not necessary normally).
 
-8. Stop all Spark workers.
+8. Stop workers.
 
-9. Stop the Spark master.
+9. Stop the master.
 
-10. "Stage out" the output files, logs, etc.
+10. Specify the output files for stage-out, maybe including logs.
 
-In the K computer, those functionalities are accessible by using pjsub and it's
-scripting manners/notations.
-`spark-k` provides functionalities to ease above 3. - 9. steps.
+```
+#PJM --rsc-list "rscgrp=small"
+#PJM --rsc-list "node=48"
+#PJM --rsc-list "elapse=00:03:00"
+#PJM --mpi "use-rankdir"
+#PJM -S
+#PJM --stgin "...omit..."
+#PJM --stgout "...omit..."
+#PJM --stg-transfiles "all"
+...omit...
+```
 
-Even with `spark-k`, you still have to use the environment specific
-resource allocation manner/commands and stage-in/out mechanism.
-This section is mainly for Spark users on dedicated cluster environment.
-
-### 1.1. How to write the job script
-
-The job script is a shell script.
-You can submit a K job written in a shell script with the `pjsub` command like:
+A written job script can be issued with the "pjsub" command:
 
 ```shell
-$ pjsub --rsc-list "node=8" --rsc-list "rscgrp=small" your_job.sh
+$ pjsub your_job.sh
 ```
 
-You can specify `pjsub` options in the job script like:
+A job script is executed on the node rank=0.
 
-```
-#PJM --rsc-list "node=8"
-#PJM --rsc-list "rscgrp=small"
-```
+## 3. File System Structure
 
-For more detail, see manual pages or help of `pjsub`.
+There are two types of file systems are used, which are specific to K.
 
-#### 1.1.1. File system structure
+* "rank"-directories: Directory is only accessible from the node.
 
-you should consider there are two types of directories that are used in the job script:
+* "shared"-directories: Directory is on a network file system (Lustre
+File System).
 
-* The rank number directory
-* The shared directory
-
-##### 1.1.1.1. The rank number directory
-
-For `spark-k`, use the rank number directory by executing `pjsub` with
-`--mpi "use-rankdir"` or write the following line in the job script:
+The use of rank-directories is recommended for performance.  The use
+is specified by a job-script line:
 
 ```
 #PJM --mpi "use-rankdir"
 ```
 
-The rank number directory is accessible
-only from the node.
-
-Your job script starts in the rank number directory on the rank 0 node.
-
-##### 1.1.1.2. The shared directory
-
-The shared directory is a parent directory of the rank directory.
-
-The shared directory is accessible from all the nodes.
-
-A unique shared directory is prepared for each K job.
-
-#### 1.1.2. Stage In/Out
+## 4. Stage-In Input Files
 
 To put the input data for Spark applications in a K job,
-you can specify stage-in options to `pjsub`.
+you can specify stage-in options to "pjsub".
 
 And to get the output data of Spark applications in a K job,
-you can also specify stage-out options to `pjsub`.
-
-##### 1.1.2.1. Input for Spark applications
+you can also specify stage-out options to "pjsub".
 
 Input data for Spark applications would be put in the shared directory.
 
@@ -126,202 +103,32 @@ or write the following line in the job script:
 #PJM --stgin "rank=0 <path to the input file> ./../"
 ```
 
-##### 1.1.2.2. Output from Spark applications
+## 6. Stage-Out Output Files
 
-In many cases, It is useful to put output files in the shared directory,
-so make the application to emit to the shared directory.
-
-To stage out the output files out, , specify options like:
-
-```shell
-$ pjsub --stgout-dir "rank=0 <path to the output directory> ./" your_job.sh
-```
-
-or write the following line in the job script:
+Staging specifications to stage out the output files out:
 
 ```
-#PJM --stgout-dir "rank=0 <path to the output directory> ./"
+#PJM --stgout "rank=* %r./filename ./somewhere/"
 ```
 
-##### 1.1.2.3. Output from Spark master/worker
-
-###### 1.1.2.3.1. Log files
-
-Log files of Spark Master/Worker are created in the `logs` directory
-in each rank number directory.
-
-To stage these logs out, write the following line in the job script:
+Log files of master/workers are created in the "logs" directory in
+rank-directory on each node.  Specify the following line, to stage out
+log files:
 
 ```
 #PJM --stgout-dir "rank=* ./logs/ ./logs/ recursive=10"
 ```
 
-###### 1.1.2.3.2. Working directory
-
-The work directory of a Spark executor is the `work` directory
-in each rank number directory.
-
-To stage these working directory out,
-write the following line in the job script:
+Working files of executors are placed in the "work" directory.
+Specify the following line, to stage out working files:
 
 ```
-#PJM --stgout-dir "rank=* ./work/ ./work/ recursive=10"
+#PJM --stgout-dir "rank=* %r:./work/ ./work/ recursive=10"
 ```
 
-#### 1.1.3. spark-k
+Note "recursive=10" above is needed because it does not traverse
+directories by default.
 
-You can use the `spark-k` scripts like in the following job-script:
+## 7. Example Job Scripts
 
-```shell
-#!/bin/sh
-
-#PJM --rsc-list "node=8"
-#PJM --rsc-list "elapse=00:30:00"
-#PJM --rsc-list "rscgrp=small"
-#PJM --mpi "use-rankdir"
-
-export PATH=<path to install spark-k>:${PATH}
-
-. <path to install spark-k>/*spark-k-initialize*
-
-${SPARK_HOME}/bin/spark-submit --master ${SPARK_MASTER} <other options> ...
-
-. <path to install spark-k>/*spark-k-finalize*
-```
-
-For more examples, see the `templates` directory.
-
-## 2. spark-k Usage
-
-### 2.1. Primitive scripts
-
-#### 2.1.1. spark-k-initialize
-
-```shell
-. <path to install>/spark-k-initialize
-```
-
-`spark-k-initialize` initializes a Spark environment in K,
-and defines these shell variables:
-
-* **NODE_NUMBER**   the number of K nodes
-* **SPARK_HOME**    the Spark home directory in the K environment
-* **K_MASTER_NODE** the node in which Spark master running (default: the rank 0 node)
-* **SPARK_MASTER**  the spark url (i.e. **spark://${K_MASTER_NODE}:7077** )
-* **COMMON_DIR**    the absolute path of the shared directory
-
-You must use `source` to load this script,
-or you cannot use these shell variables.
-
-You can change behavior of this script by defining
-the following shell variable before use this script:
-
-* **SEPARATE_DRIVER_NODE** if this variable isn't empty,
-  Spark master runs in the rank 1 node if the node exists
-
-If you want to run either Spark driver or Spark master in a different node,
-define `SEPARATE_DRIVER_NODE` and submit a Spark application with `--deploy-mode client`.
-
-#### 2.1.2. spark-k-finalize
-
-```shell
-. <path to install>/spark-k-finalize
-```
-
-`spark-k-finalize` waits for all spark job finish,
-then stops a Spark master and all Spark workers.
-
-#### 2.1.3. spark-k-wait-initialize
-
-```
-usage: spark-k-wait-initialize [-h] [--host HOST] [--port PORT]
-                               [--interval INTERVAL]
-                               [--retry-max RETRY_MAX]
-                               [--node-num NODE_NUM]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --host HOST           specify the host of Spark master (default: localhost).
-  --port PORT           specify the port of Spark master UI (default: 8080).
-  --interval INTERVAL   wait INTERVAL seconds between check Spark master UI
-                        (default: 3).
-  --retry-max RETRY_MAX
-                        stop after RETRYMAX times chekcing (default: 0). When
-                        RETRYMAX is 0, never stop until initialization finish.
-  --node-num NODE_NUM   wait NODENUM workers connected to Spark master
-                        (default: 0).
-```
-
-`spark-k-wait-initialize` waits for Spark workers connect to the Spark master.
-`spark-k-initialize` uses this script implicitly.
-
-#### 2.1.4. spark-k-wait-spark-job-finish
-
-```
-usage: spark-k-wait-spark-job-finish [-h] [--host HOST] [--port PORT]
-                                     [--interval INTERVAL]
-                                     [--retrymax RETRYMAX]
-
-optional arguments:
-  -h, --help           show this help message and exit
-  --host HOST          specify the host of Spark master (default: localhost).
-  --port PORT          specify the port of Spark master UI (default: 8080).
-  --interval INTERVAL  wait INTERVAL seconds between check Spark master UI
-                       (default: 3).
-  --retrymax RETRYMAX  stop after RETRYMAX times chekcing (default: 0). When
-                       RETRYMAX is 0, never stop until all spark jobs finish.
-```
-
-`spark-k-wait-spark-job-finish` waits for all Spark jobs finish.
-`spark-k-finalize` uses this script implicitly.
-
-### 2.2. Convenient scripts
-
-#### 2.2.1. spark-k-submit
-
-```
-Usage: spark-k-submit [-h|--help] spark_arguments ...
-    -h,--help    Show this help
-```
-
-`spark-k-submit` is a wrapper script for `spark-submit`.
-
-```shell
-spark-k-submit <other options>...
-```
-
-is the same as the following:
-
-```shell
-. <path to install>/spark-k-initialize
-
-${SPARK_HOME}/bin/spark-submit --master ${SPARK_MASTER} <other options>...
-
-. <path to install>/spark-k-finalize
-```
-
-`spark-k-submit` add or replace the **--master** option
-for Spark on the K computer.
-
-#### 2.2.2. spark-k
-
-```
-spark-k <command>...:
-    --help|-?    show this help.
-```
-
-`spark-k` is wrapper for any command for Spark on the K computer.
-
-```shell
-spark-k <command> <option>...
-```
-
-is the same as the following:
-
-```shell
-. <path to install>/spark-k-initialize
-
-<command> <option>...
-
-. <path to install>/spark-k-finalize
-```
+See [examples](../examples).

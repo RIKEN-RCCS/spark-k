@@ -1,12 +1,12 @@
-[](-*-Mode: Fundamental; Coding: us-ascii;-*-)
+<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
 
-# BUILD AND INSTALL
+# Build and Install
 
-The install documents describes procedures building R and Spark on K.
-Spark is installed in "/opt/aics/spark", and R is installed in
-"/opt/aics/R".  They are built with the following procedures.
+This describes procedures building R and Spark on K.  Spark is
+installed on K in "/opt/aics/spark", and R in "/opt/aics/R".  They are
+built with the following procedures.
 
-Brief procedures:
+Procedures:
 
 * [Building R](BUILDR.md)
 * [Building Spark](BUILDSPARK.md)

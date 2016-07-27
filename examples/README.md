@@ -1,6 +1,6 @@
-[](-*-Mode: Fundamental; Coding: us-ascii;-*-)
+<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
 
-# Examples of Apache Spark on K (2016-07-21)
+# Examples of Spark on K (2016-07-21)
 
 This directory includes simple examples.  It lists job-scheduler
 scripts for K (Fujitsu Parallel-Navi).
@@ -24,7 +24,7 @@ pre-compiled code is included.
 
 It runs "ml.R" and "dataframe.R".
 
-Note "RSparkSQLExample.R" is not included, because it is missing while
+Note "RSparkSQLExample.R" is not included because it is missing while
 it appears in the recent source tree.
 
 ## Notes on run04-r-data-manipulation.sh

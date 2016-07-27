@@ -1,4 +1,4 @@
-[](-*-Mode: Fundamental; Coding: us-ascii;-*-)
+<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
 
 # Using Apache Spark on K
 
@@ -7,16 +7,14 @@ for running [Apache Spark](http://spark.apache.org/) on [K
 Computer](http://www.aics.riken.jp/en/k-computer/about/).  It also
 includes simple examples.
 
-* The installation documentation is in docs.  See [docs](docs).
+* The installation documentation is in [docs](docs).  Spark (1.6.2) is
+installed in "/opt/aics/spark/spark-1.6.2-bin-sparkk" on K.
 
-* The utility scripts are in scripts.  See [scripts](scripts).
+* The utility scripts are in [scripts](scripts).  The scripts are in
+"/opt/aics/spark/scripts" on K.
 
-* The examples are in examples. See [examples](examples).  They are
-provided as job scripts for Fujitsu job manager.
-
-It assumes Spark is already installed in
-"/opt/aics/spark/spark-1.6.2-bin-sparkk" and the scripts are in
-"/opt/aics/spark/scripts".
+* The examples are in [examples](examples).  They are provided as job
+scripts for Fujitsu job manager.
 
 ## Basics
 
@@ -24,8 +22,8 @@ The scripts are simple wrappers of the scripts of Spark, which help
 start/stop master and worker processes.  Spark runs in the [Spark
 standalone
 mode](http://spark.apache.org/docs/latest/spark-standalone.html), but
-the master/workers are started using MPI (Message Passing Interface)
-via mpiexec.
+master/workers are started using MPI (Message Passing Interface) via
+mpiexec.
 
 Check out that Spark is installed in "/opt/aics/spark" and R in
 "/opt/aics/R" (on the compute-nodes).
@@ -33,16 +31,13 @@ Check out that Spark is installed in "/opt/aics/spark" and R in
 ## Running Examples
 
 First try the sample job scripts (for Fujitsu job manager) in the
-"examples".
-
-* Run the sample job scripts in the "examples" directory.
-* See [Running Spark-Perf](RunSparkPerf)
+[examples](examples).
 
 ## Building Spark
 
-For build and install procedures, see [docs](docs).  Also, see
-[wiki](https://github.com/pf-aics-riken/spark-k/wiki).
+For build and install procedures, see [docs](docs).
 
 ## More Information
 
-* For more information, see [Basics in docs](docs/BASICS.md).
+* For more information using Spark on K, see [Basics in
+docs](docs/BASICS.md).

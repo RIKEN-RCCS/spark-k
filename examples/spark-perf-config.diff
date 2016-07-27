@@ -1,5 +1,5 @@
 --- spark-perf-master/config/config.py.template	2015-12-09 07:21:03.000000000 +0900
-+++ spark-perf-config-basic.py	2016-07-26 21:50:26.000000000 +0900
++++ spark-perf-config-basic.py	2016-07-27 18:00:44.000000000 +0900
 @@ -18,7 +18,7 @@
  # ================================ #
  
@@ -71,20 +71,24 @@
  # value suitable for a single machine, such as 0.001.
 -SCALE_FACTOR = 1.0
 +#SCALE_FACTOR = 1.0
-+SCALE_FACTOR = 0.5
++SCALE_FACTOR = 0.1
  
  assert SCALE_FACTOR > 0, "SCALE_FACTOR must be > 0."
  
-@@ -141,7 +145,7 @@
+@@ -141,9 +145,10 @@
  # Java options.
  COMMON_JAVA_OPTS = [
      # Fraction of JVM memory used for caching RDDs.
 -    JavaOptionSet("spark.storage.memoryFraction", [0.66]),
 +    #JavaOptionSet("spark.storage.memoryFraction", [0.66]),
      JavaOptionSet("spark.serializer", ["org.apache.spark.serializer.JavaSerializer"]),
-     # JavaOptionSet("spark.executor.memory", ["9g"]),
+-    # JavaOptionSet("spark.executor.memory", ["9g"]),
++    JavaOptionSet("spark.executor.memory", ["8g"]),
++    JavaOptionSet("spark.executor.cores", ["4"]),
      # Turn event logging on in order better diagnose failed tests. Off by default as it crashes
-@@ -151,7 +155,7 @@
+     # releases prior to 1.0.2
+     # JavaOptionSet("spark.eventLog.enabled", [True]),
+@@ -151,7 +156,7 @@
      JavaOptionSet("spark.locality.wait", [str(60 * 1000 * 1000)])
  ]
  # Set driver memory here
@@ -93,27 +97,3 @@
  # The following options value sets are shared among all tests.
  COMMON_OPTS = [
      # How many times to run each experiment - used to warm up system caches.
-@@ -167,9 +171,11 @@
- # operations on key-value data.
- SPARK_KEY_VAL_TEST_OPTS = [
-     # The number of input partitions.
--    OptionSet("num-partitions", [400], can_scale=True),
-+    #OptionSet("num-partitions", [400], can_scale=True),
-+    OptionSet("num-partitions", [100], can_scale=True),
-     # The number of reduce tasks.
--    OptionSet("reduce-tasks", [400], can_scale=True),
-+    #OptionSet("reduce-tasks", [400], can_scale=True),
-+    OptionSet("reduce-tasks", [100], can_scale=True),
-     # A random seed to make tests reproducable.
-     OptionSet("random-seed", [5]),
-     # Input persistence strategy (can be "memory", "disk", or "hdfs").
-@@ -192,8 +198,7 @@
-     # Use hashes instead of padded numbers for keys and values
-     FlagSet("hash-records", [False]),
-     # Storage location if HDFS persistence is used
--    OptionSet("storage-location", [
--        HDFS_URL + "/spark-perf-kv-data"])
-+    OptionSet("storage-location", [HDFS_URL + "/spark-perf-kv-data"])
- ]
- 
- 

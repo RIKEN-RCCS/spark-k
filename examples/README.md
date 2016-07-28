@@ -9,7 +9,9 @@ scripts for K (Fujitsu Parallel-Navi).
 installation, some are mentioned at the bottom in the "Quick Start"
 page (http://spark.apache.org/docs/latest/quick-start.html).  The code
 are in the "Apache Spark Examples" page
-(http://spark.apache.org/examples.html).
+(http://spark.apache.org/examples.html).  Scripts "run05" and "run06"
+run tests Scala Pi (same as "run00"), but "run05" with using the
+micro-queue and "run06" without using rank-directories.
 
 * Scripts "run1x-xxx.sh" run the code shipped from this directory.
 The codes are "SimpleApp" in the "Self-Contained Applications" section
@@ -20,11 +22,8 @@ pre-compiled code is included.
 
 * Scripts "run2x-xxx.sh" run tests of Spark-Perf.  Spark-Perf is at
 https://github.com/databricks/spark-perf.  Build is necessary.
-"run20-spark-perf.sh" runs "SPARK_TESTS".
-"run23-spark-perf-pearson.sh" runs only "PEARSON" from MLLIB.
-
-* Scripts "run3x-xxx.sh" run tests Scala Pi (same as run00), but using
-the "micro"-queue and without rank-directories.
+"run20" runs "SPARK_TESTS".  "run23" and "run24" runs only "PEARSON"
+qfrom MLLIB for varying node sizes.
 
 ## Notes on run03-r.sh
 

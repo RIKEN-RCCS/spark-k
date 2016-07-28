@@ -2,8 +2,10 @@
 
 """
 Command to wait until all applications finish.  It returns 0, or 1 on
-error.  It checks all entries to become "completed: true" in responses
-from HTTP UI (http://master:8080/api/v1/applications/).
+error.  It wait indefinitely by default.  It checks all entries to
+become "completed: true" in responses from HTTP UI
+(http://master:8080/api/v1/applications/).  Normally, it immediately
+returns, because spark-submit waits for itself.
 """
 
 import sys
@@ -21,19 +23,19 @@ logger = logging.getLogger(__name__)
 
 
 class WaitCommand():
-    """ Command to wait until no pending applications exist. """
+    """Command to wait until no pending applications exist."""
 
     __parser = argparse.ArgumentParser()
     __parser.add_argument('--terse', action='store_true',
                           help=argparse.SUPPRESS)
     __parser.add_argument('--host', type=str, default='localhost')
     __parser.add_argument('--port', type=int, default=8080)
-    __parser.add_argument('--interval', type=int, default=3)
+    __parser.add_argument('--interval', type=int, default=10)
     __parser.add_argument('--retrys', type=int, default=0)
 
     @classmethod
     def __parse_args(cls):
-        """ Parses arguments. """
+        """Parses arguments."""
 
         args = cls.__parser.parse_args(sys.argv[1:])
         if args.port < 0:
@@ -47,7 +49,7 @@ class WaitCommand():
 
     @classmethod
     def run(cls):
-        """ Waits until no workers are available. """
+        """Waits until all executors finish."""
 
         args = cls.__parse_args()
 

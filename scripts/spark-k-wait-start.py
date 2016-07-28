@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class WaitCommand():
-    """ Command to wait until all workers connect to a master. """
+    """Command to wait until all workers connect to a master."""
 
     __parser = argparse.ArgumentParser()
     __parser.add_argument('workers', type=int,
@@ -35,7 +35,7 @@ class WaitCommand():
 
     @classmethod
     def __parse_args(cls):
-        """ Parses arguments. """
+        """Parses arguments."""
 
         args = cls.__parser.parse_args(sys.argv[1:])
         if args.port < 0:
@@ -71,7 +71,7 @@ class WaitCommand():
 
     @classmethod
     def run(cls):
-        """ Waits until all workers become available. """
+        """Waits until all workers become available."""
 
         args = cls.__parse_args()
 

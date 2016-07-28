@@ -11,4 +11,7 @@ Procedures:
 * [Building R](BUILDR.md)
 * [Building Spark](BUILDSPARK.md)
 
-* [Basics](BASICS.md)
+Basics:
+
+* [Basics](BASICS.md) describes the basic usage of K, to understand
+what the provided scripts and examples do.

@@ -1,15 +1,13 @@
 #!/bin/sh -x
 
-# Runs Python Pi in the examples, with 12 nodes (1 master + 11
-# workers), using "rank"-directories.
+# Runs Sacla Pi in the examples, with 12 nodes (1 master + 11
+# workers), NOT using "rank"-directories.
 
 #PJM --rsc-list "rscgrp=small"
 #PJM --rsc-list "node=12"
 #PJM --rsc-list "elapse=00:06:00"
-#PJM --mpi "use-rankdir"
 #PJM -S
-#PJM --stgout "rank=0 0:../spark.conf/* ./%n.z%j/"
-#PJM --stgout "rank=* %r:./spark.logs/* ./%n.z%j/"
+#PJM --stgout "./spark.logs/* ./%n.z%j/"
 #PJM --stg-transfiles "all"
 
 . /work/system/Env_base > /dev/null
@@ -22,8 +20,9 @@ spark_k_setup
 spark_k_start_all
 
 ${SPARK_HOME}/bin/spark-submit \
+    --class org.apache.spark.examples.SparkPi \
     --master "${k_master_url}" \
-    ${SPARK_HOME}/examples/src/main/python/pi.py 1000
+    ${SPARK_HOME}/lib/spark-examples-1.6.2-hadoop2.2.0.jar
 
 spark_k_stop_all
 spark_k_clean

@@ -18,14 +18,19 @@ in the "Quick Start" page
 in directories "java", "python", and "scala".  Build is necessary, but
 pre-compiled code is included.
 
-* Scripts "run2x-xxx.sh" run tests of Spark-Perf.  Build is necessary.
+* Scripts "run2x-xxx.sh" run tests of Spark-Perf.  Spark-Perf is at
+https://github.com/databricks/spark-perf.  Build is necessary.
+"run20-spark-perf.sh" runs "SPARK_TESTS".
+"run23-spark-perf-pearson.sh" runs only "PEARSON" from MLLIB.
+
+* Scripts "run3x-xxx.sh" run tests Scala Pi (same as run00), but using
+the "micro"-queue and without rank-directories.
 
 ## Notes on run03-r.sh
 
-It runs "ml.R" and "dataframe.R".
-
-Note "RSparkSQLExample.R" is not included because it is missing while
-it appears in the recent source tree.
+It runs "ml.R" and "dataframe.R".  Note "RSparkSQLExample.R" is not
+included because it is missing while it appears in the recent source
+tree.
 
 ## Notes on run04-r-data-manipulation.sh
 
@@ -47,21 +52,37 @@ Build procedures: The following run MVN for Java and SBT for Scala.
 * cd java; make
 * cd scala; make
 
-Note SimpleAPp in Python does not launch wokers.
+Note SimpleApp in Python does not launch wokers.
+
+## Notes on run20-spark-perf.sh
+
+It runs "SPARK_TESTS".  It sets the number of nodes very small
+(node=8).  Running with larger nodes fails due to limits of Java
+memory or number of open files.
+
+## Notes on run23-spark-perf-pearson.sh
+
+It runs MLLIB "pearson".  "run23" runs with relatively large 384
+workers, and "run24" with small workers (48, 96, 192).
+
+Results are in
+"run23-spark-perf-pearson.sh.wNNN/mllib_perf_output_XXX".  Note the
+"Time:" line consists of (med, std, min, first-result, last-result).
+See "spark-perf-master/lib/sparkperf/utils.py".
 
 ## Building Spark-Perf
+
+Spark-Perf is at "https://github.com/databricks/spark-perf".  The used
+version is commit 6e4f26de0fcd58b629abb8f5389bb15f914752e7 (Dec 9,
+2015).
 
 Download the package.
 
     $ make spark-perf-download
 
-It download the package
+It downloads the package from
 "https://github.com/databricks/spark-perf/archive/master.zip" and
-unzips it.  The Files are expanded in "spark-perf-master".
-
-Check a modified config file "spark-perf-config.basic.py".
-
-    $ diff -u spark-perf-master/config/config.template.py ./spark-perf-config.basic.py
+unzips it.  The files will be expanded in "spark-perf-master".
 
 Build.
 
@@ -71,8 +92,13 @@ Build.
 "spark-perf-build.py" is a modified copy of "lib/sparkperf/main.py".
 All but build related routines are deleted.
 
-All tests are disabled in "spark-perf-config.basic.py".  Enable needed
-ones.
+The examples here uses a modified configuration file.  Additionally,
+check the difference "spark-perf-config.basic.py".
+
+    $ diff -u spark-perf-master/config/config.template.py ./spark-perf-config.basic.py
+
+All tests are disabled in "spark-perf-config.basic.py".  It needs to
+enable ones.
 
 * RUN_SPARK_TESTS = True/False
 * RUN_PYSPARK_TESTS = True/False
@@ -80,18 +106,19 @@ ones.
 * RUN_MLLIB_TESTS = True/False
 * RUN_PYTHON_MLLIB_TESTS = True/False
 
-## spark-perf "SPARK_TESTS"
+## Setting on spark-perf-config-basic.py
 
-* Reduce "SCALE_FACTOR" from 1.0 to 0.5.  It allows to run
-"scala-agg-by-key" failed with "java.lang.OutOfMemoryError: GC
-overhead limit exceeded".
+* The diff to the original is in "spark-perf-config.diff".
 
-* Set nprocs=12.  Reduce "num-partitions" and "reduce-tasks" from 400
-to 100.  "scala-agg-by-key-naive" failed with
-"java.io.FileNotFoundException: (Too many open files)"
+* Reduce "SCALE_FACTOR" from 1.0 to 0.1.  
 
-NUM_PARTITIONS for "num-partitions"
+* Reduce "spark.executor.cores" from 8 to 4.
 
-## Notes on spark-perf-config-basic.py
+* Comment out the option "spark.storage.memoryFraction", which is
+deprecated.
 
-* Option "spark.storage.memoryFraction" is said to be deprecated.
+Reducing "SCALE_FACTOR" and "spark.executor.cores", and using small
+number of nodes is needed to run tests, which failed with
+"java.lang.OutOfMemoryError" ("GC overhead limit exceeded" or "Java
+heap space"), and "java.io.FileNotFoundException" ("Too many open
+files").

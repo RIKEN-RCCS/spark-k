@@ -5,45 +5,39 @@
 
 ## 1.  Introduction
 
-The "spark-k" package is a utility for Spark running on K computer,
-This document aims at Spark users of an ordinary clusters.
+This package is a utility for Spark running on K computer.  This
+document aims at Spark users of an ordinary clusters.
 
-Compared to an ordinary cluster environment, K computer differs in
-following characteristics:
+Compared to an ordinary cluster environment, K differs in following
+characteristics:
 
-* Jobs are under the control of a job-scheduler.
+* Jobs run under the control of a job-scheduler.
 
 * The working storage is "staged".  The working set files must be
 copied in from the permanent storage system to the working storage
-system by "stage-in", and results must be copied out by "stage-out".
+system by "stage-in", and results must be copied back by "stage-out".
 
-* Processes on the allocated node must be started by the "mpiexec"
+* Processes on the allocated nodes must be started by the "mpiexec"
 command provided in MPI (Message Passing Interface).
 
 ## 2. Writing a Job Script
 
-A job script is in the form a shell script (bash).  The user needs to
-write the following steps in her job script:
+A job is submitted to the job-schedular as a script in the form a
+shell script (bash).  The users need to follow the steps in her job
+script:
 
 1. Specify a request of the number of the nodes.
-
 2. Specify the input files for stage-in.
-
 3. Start a master.
-
 4. Start workers.
-
 5. Wait for all the workers are registered into the master.
-
 6. Launch some jobs by spark-submit.
-
 7. Wait for the jobs finish (not necessary normally).
-
 8. Stop workers.
-
 9. Stop the master.
-
 10. Specify the output files for stage-out, maybe including logs.
+
+Job scripts should look like the following:
 
 ```
 #PJM --rsc-list "rscgrp=small"
@@ -57,22 +51,23 @@ write the following steps in her job script:
 ...omit...
 ```
 
-A written job script can be issued with the "pjsub" command:
+A job script can be submitted with the "pjsub" command:
 
 ```shell
-$ pjsub your_job.sh
+$ pjsub your-job-script.sh
 ```
 
-A job script is executed on the node rank=0.
+The executable part of a job script is executed on the node rank=0.
 
 ## 3. File System Structure
 
-There are two types of file systems are used, which are specific to K.
+There are two types of name spaces in the file system, which are are
+specific to K.
 
-* "rank"-directories: Directory is only accessible from the node.
+* "rank"-directories: Directory is only accessible from a single node.
 
-* "shared"-directories: Directory is on a network file system (Lustre
-File System).
+* "shared"-directories: Directory is shared on a network file system
+(Lustre File System).
 
 The use of rank-directories is recommended for performance.  The use
 is specified by a job-script line:

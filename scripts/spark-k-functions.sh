@@ -2,18 +2,20 @@
 
 # Simple scripts for running Spark.  Source this file.
 
-# (spark_k_setup) Generates host-list files.  It determines the nodes
-# for a master and workers, and generates two host-list files and a
-# setting file.  One host-list file consists of all nodes and the
-# other consists of worker nodes.  It assigns a single master and
-# (nprocs-1) workers.  Optional first argument limits the number of
-# nodes.  A setting file contains variables "${k_master_node}",
-# "${k_master_url}", and "${k_n_workers}".  The variables are
-# environment-exported to be accessible from Python, etc.  Note that
-# the files are created in "${PJM_JOBDIR}", which points to a
-# so-called "shared"-directory (it is one up from a "rank"-directory)
-# and accessible from all ranks.  It is called by the main job script
-# (a single process).
+# (spark_k_setup) Generates a host-list file.  It determines the nodes
+# for a master and workers, and generates a host-list file and a
+# setting file.  Optional first argument limits the number of workers.
+# A host-list consists of hostnames of worker nodes.  It assigns a
+# single master and (nprocs-1) workers.  A master is on rank=0.  A
+# setting file contains variables "${k_master_node}",
+# "${k_master_url}", and "${k_n_workers}".  These variables are
+# environment-exported to be accessible from subprocesses of Python,
+# etc.  Note that the files are created in "${PJM_JOBDIR}", which
+# points to a so-called "shared"-directory and accessible from all
+# nodes.  Normally, a "shared"-directory is one up from a
+# "rank"-directory.  This is called by the main job script (a single
+# process).  As a by-product, it also generates another list
+# consisting of all nodes.
 
 spark_k_setup() {
     # Make a "conf" directory.
@@ -22,9 +24,9 @@ spark_k_setup() {
 
     # Make a host-list.
 
-    ## if [ -n "$1" -a "$1" -gt 0 ]; then
     if [ -n "$1" ] && [ "$1" -gt 0 ]; then
-        mpiexec -n "$1" ${k_scripts}/gatherhostnames "${k_nodes_file}"
+        nprocs=`expr "$1" + 1`
+        mpiexec -n "$nprocs" ${k_scripts}/gatherhostnames "${k_nodes_file}"
     else
         mpiexec ${k_scripts}/gatherhostnames "${k_nodes_file}"
     fi

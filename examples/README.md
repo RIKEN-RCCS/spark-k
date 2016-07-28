@@ -23,18 +23,19 @@ pre-compiled code is included.
 * Scripts "run2x-xxx.sh" run tests of Spark-Perf.  Spark-Perf is at
 https://github.com/databricks/spark-perf.  Build is necessary.
 "run20" runs "SPARK_TESTS".  "run23" and "run24" runs only "PEARSON"
-qfrom MLLIB for varying node sizes.
+from MLLIB for varying node sizes.
 
-## Notes on run03-r.sh
+## Notes on RUN03
 
-It runs "ml.R" and "dataframe.R".  Note "RSparkSQLExample.R" is not
-included because it is missing while it appears in the recent source
-tree.
+"run03-r.sh" runs "ml.R" and "dataframe.R".  Note "RSparkSQLExample.R"
+is not included because it is missing while it appears in the recent
+source tree.
 
-## Notes on run04-r-data-manipulation.sh
+## Notes on RUN04
 
-Running "data-manipulation.R" needs some files to be downloaded.  Run
-"make data-manipulation-downloads" for them.
+"run04-r-data-manipulation.sh" runs data-manipulation.R, which needs
+some files to be downloaded.  Run "make data-manipulation-downloads"
+for them.
 
 * "flights.csv" from http://s3-us-west-2.amazonaws.com/.
 * "commons-csv-1.1.jar" from http://search.maven.org/.
@@ -44,27 +45,32 @@ It generates a warning: "WARN TaskSetManager: Stage 0 contains a task
 of very large size (648 KB). The maximum recommended task size is 100
 KB".
 
-## Notes on run10-simpleapp.sh
+## Notes on RUN10
 
-Build procedures: The following run MVN for Java and SBT for Scala.
+"run10-simpleapp.sh" runs SimpleApp.  It needs build.
+
+Build procedures: The following runs MVN for Java and SBT for Scala.
 
 * cd java; make
 * cd scala; make
 
-Note SimpleApp in Python does not launch wokers.
+Note that SimpleApp in Python does not launch workers.
 
-## Notes on run20-spark-perf.sh
+## Notes on RUN20 and RUN21
 
-It runs "SPARK_TESTS".  It sets the number of nodes very small
-(node=8).  Running with larger nodes fails due to limits of Java
-memory or number of open files.
+"run20-spark-perf.sh" runs "SPARK_TESTS" and "run21-spark-perf.sh"
+runs "STREAMING_TESTS".  The problem size is set to small SCALE=0.1.
+They also set the number of nodes and cores very small (nodes=8,
+cores=4).  Running with larger configuration will fail due to the
+limits of Java memory or number of open files.
 
-## Notes on run23-spark-perf-pearson.sh
+## Notes on RUN23 and RUN24
 
-It runs MLLIB "pearson".  "run23" runs with relatively large 384
-workers, and "run24" with small workers (48, 96, 192).
+"run23-spark-perf-pearson.sh" and "run24-spark-perf-pearson.sh" run
+"pearson" in MLLIB.  "run23" runs with relatively large 384 workers,
+and "run24" with small workers (48, 96, and 192).
 
-Results are in
+Results will be stored in
 "run23-spark-perf-pearson.sh.wNNN/mllib_perf_output_XXX".  Note the
 "Time:" line consists of (med, std, min, first-result, last-result).
 See "spark-perf-master/lib/sparkperf/utils.py".
@@ -109,7 +115,7 @@ enable ones.
 
 * The diff to the original is in "spark-perf-config.diff".
 
-* Reduce "SCALE_FACTOR" from 1.0 to 0.1.  
+* Reduce "SCALE_FACTOR" from 1.0 to 0.1.
 
 * Reduce "spark.executor.cores" from 8 to 4.
 

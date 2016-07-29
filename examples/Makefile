@@ -34,4 +34,4 @@ spark-perf-config.diff::
 		spark-perf-config-basic.py > spark-perf-config.diff; true
 
 veryclean::
-	rm -f run??-*.sh.[eioswz][0-9]*
+	rm -rf run??-*.sh.[eioswz][0-9]*

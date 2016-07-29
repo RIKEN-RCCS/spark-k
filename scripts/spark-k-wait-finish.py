@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 """
-Command to wait until all applications finish.  It returns 0, or 1 on
-error.  It wait indefinitely by default.  It checks all entries to
+Wait command for all applications finish.  It returns 0, or 1 on
+error.  It waits indefinitely by default.  It checks all entries to
 become "completed: true" in responses from HTTP UI
 (http://master:8080/api/v1/applications/).  Normally, it immediately
-returns, because spark-submit waits for itself.
+returns, because spark-submit waits by itself.
 """
 
 import sys
@@ -22,8 +22,8 @@ logging.basicConfig(format=FORMAT)
 logger = logging.getLogger(__name__)
 
 
-class WaitCommand():
-    """Command to wait until no pending applications exist."""
+class WaitFinish():
+    """Wait command until no pending applications exist."""
 
     __parser = argparse.ArgumentParser()
     __parser.add_argument('--terse', action='store_true',
@@ -103,5 +103,5 @@ class WaitCommand():
 
 
 if __name__ == '__main__':
-    v = WaitCommand.run()
+    v = WaitFinish.run()
     sys.exit(v)

@@ -29,9 +29,9 @@ mpiexec.
 The scripts assume that Spark is installed in "/opt/aics/spark" and R
 in "/opt/aics/R" (on the compute-nodes).
 
-## Running Examples
+## Examples
 
-First try the sample job scripts (for Fujitsu job manager) in the
+First try the sample job scripts (for Fujitsu job manager) in
 [examples](examples).
 
 ## Building Spark

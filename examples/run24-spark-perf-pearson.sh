@@ -1,11 +1,11 @@
 #!/bin/sh -x
 
-# Runs PEARSON in MLLIB tests with 48, 96, and 192 nodes.  Run
-# run23-spark-perf-pearson.sh for large scale.
+# Runs PEARSON in MLLIB tests with 48, 96, and 192 nodes.  Run "run23"
+# for larger scale.
 
 #PJM --rsc-list "rscgrp=small"
 #PJM --rsc-list "node=204"
-#PJM --rsc-list "elapse=02:00:00"
+#PJM --rsc-list "elapse=00:30:00"
 #PJM -S
 #PJM --stgin "./spark-perf.tz ./"
 #PJM --stgin "./spark-perf-config-common.py ./"

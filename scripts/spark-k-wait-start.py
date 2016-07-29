@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-Command to wait until all workers join to a master.  It returns 0, or
-1 on error.  It checks responses from HTTP UI (http://master:8080/).
-It retries for 120 seconds by default.
+Wait command for all workers join to a master.  It returns 0, or 1 on
+error.  It checks responses from HTTP UI (http://master:8080/).  It
+retries in 600 seconds by default.
 """
 
 import sys
@@ -20,8 +20,8 @@ logging.basicConfig(format=FORMAT)
 logger = logging.getLogger(__name__)
 
 
-class WaitCommand():
-    """Command to wait until all workers connect to a master."""
+class WaitStart():
+    """Wait command until all workers connect to a master."""
 
     __parser = argparse.ArgumentParser()
     __parser.add_argument('workers', type=int,
@@ -30,8 +30,8 @@ class WaitCommand():
                           help=argparse.SUPPRESS)
     __parser.add_argument('--host', type=str, default='localhost')
     __parser.add_argument('--port', type=int, default=8080)
-    __parser.add_argument('--interval', type=int, default=3)
-    __parser.add_argument('--retrys', type=int, default=40)
+    __parser.add_argument('--interval', type=int, default=10)
+    __parser.add_argument('--retrys', type=int, default=60)
 
     @classmethod
     def __parse_args(cls):
@@ -93,8 +93,9 @@ class WaitCommand():
             try:
                 response = urllib2.urlopen(req)
             except urllib2.URLError as e:
-                logger.error('Bad connection: {}.'.format(str(e)))
-                return 1
+                logger.warning('Bad connection: {}.'.format(str(e)))
+                time.sleep(args.interval)
+                continue
             except urllib2.HTTPError as e:
                 logger.warning('Bad response: {}.'.format(str(e)))
                 time.sleep(args.interval)
@@ -119,5 +120,5 @@ class WaitCommand():
 
 
 if __name__ == '__main__':
-    v = WaitCommand.run()
+    v = WaitStart.run()
     sys.exit(v)

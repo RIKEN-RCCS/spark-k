@@ -2,11 +2,12 @@
 
 # Examples of Spark on K (2016-07-21)
 
-This directory includes simple examples.  It lists job-scheduler
-scripts for K (Fujitsu Parallel-Navi).
+This directory includes simple examples.  They are job-scheduler
+scripts for K (Fujitsu Parallel-Navi).  They can be submitted by
+"pjsub" command.
 
 * Scripts "run0x-xxx.sh" run the code included in the Spark
-installation, some are mentioned at the bottom in the "Quick Start"
+installation.  Some are mentioned at the bottom in the "Quick Start"
 page (http://spark.apache.org/docs/latest/quick-start.html).  The code
 are in the "Apache Spark Examples" page
 (http://spark.apache.org/examples.html).  Scripts "run05" and "run06"
@@ -22,20 +23,20 @@ pre-compiled code is included.
 
 * Scripts "run2x-xxx.sh" run tests of Spark-Perf.  Spark-Perf is at
 https://github.com/databricks/spark-perf.  Build is necessary.
-"run20" runs "SPARK_TESTS".  "run23" and "run24" runs only "PEARSON"
-from MLLIB for varying node sizes.
+"run20", "run21", and "run22" run "SPARK_TESTS", "STREAMING_TESTS",
+and "MLLIB_TESTS", respectively.  "run23" and "run24" runs only
+"PEARSON" from MLLIB for varying node sizes.
 
 ## Notes on RUN03
 
-"run03-r.sh" runs "ml.R" and "dataframe.R".  Note "RSparkSQLExample.R"
-is not included because it is missing while it appears in the recent
+"run03" runs "ml.R" and "dataframe.R".  Note "RSparkSQLExample.R" is
+not included because it is missing while it appears in the recent
 source tree.
 
 ## Notes on RUN04
 
-"run04-r-data-manipulation.sh" runs data-manipulation.R, which needs
-some files to be downloaded.  Run "make data-manipulation-downloads"
-for them.
+"run04" runs data-manipulation.R, which needs some files to be
+downloaded.  Run "make data-manipulation-downloads" for them.
 
 * "flights.csv" from http://s3-us-west-2.amazonaws.com/.
 * "commons-csv-1.1.jar" from http://search.maven.org/.
@@ -47,7 +48,7 @@ KB".
 
 ## Notes on RUN10
 
-"run10-simpleapp.sh" runs SimpleApp.  It needs build.
+"run10" runs SimpleApp.  It needs build.
 
 Build procedures: The following runs MVN for Java and SBT for Scala.
 
@@ -56,19 +57,19 @@ Build procedures: The following runs MVN for Java and SBT for Scala.
 
 Note that SimpleApp in Python does not launch workers.
 
-## Notes on RUN20 and RUN21
+## Notes on RUN20, RUN21, and RUN22
 
-"run20-spark-perf.sh" runs "SPARK_TESTS" and "run21-spark-perf.sh"
-runs "STREAMING_TESTS".  The problem size is set to small SCALE=0.1.
-They also set the number of nodes and cores very small (nodes=8,
-cores=4).  Running with larger configuration will fail due to the
-limits of Java memory or number of open files.
+The problem size is set to small SCALE=0.1.  They also set the number
+of nodes and cores very small (nodes=8, cores=4).  Running with larger
+configuration will fail due to the limits of Java memory or number of
+open files.  Running MLLIB tests ("run22") will take very long time,
+and will likely never finish.
 
 ## Notes on RUN23 and RUN24
 
-"run23-spark-perf-pearson.sh" and "run24-spark-perf-pearson.sh" run
-"pearson" in MLLIB.  "run23" runs with relatively large 384 workers,
-and "run24" with small workers (48, 96, and 192).
+"run23" and "run24" run "pearson" in MLLIB.  "run23" runs with
+relatively large 384 workers, and "run24" with small workers (48, 96,
+and 192).
 
 Results will be stored in
 "run23-spark-perf-pearson.sh.wNNN/mllib_perf_output_XXX".  Note the

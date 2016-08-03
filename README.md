@@ -36,7 +36,7 @@ First try the sample job scripts (for Fujitsu job manager) in
 
 ## Building Spark
 
-For build and install procedures, see [docs](docs).
+For procedures to build and install, see [docs](docs).
 
 ## More Information
 

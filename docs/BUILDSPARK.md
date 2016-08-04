@@ -7,17 +7,14 @@
 * Apache Spark is installed in "/opt/aics/spark" on the compute-nodes.
   This describes how it is built.
 
-* Build is run on a front-end host.  Almost no cross compiling is
-necessary as it is a JVM application.  The only exception is
-Snappy-Java, which includes a binary library.
+* Build is run on a frontend.  Almost no cross compiling is necessary
+as it is a JVM application.  The only exception is Snappy-Java, which
+includes a binary library.
 
-* Run this procedure on a front-end host which is not too busy.  Most
-hosts are too busy to run Java JVM.
+* Run this procedure on a frontend which is not too busy.  Most hosts
+are too busy (insufficient memory) to run Java JVM.
 
-This is a brief procedure; See the old procedure
-[InstallSpark](InstallSpark) for details.  Note the old procedure is
-for Spark 1.6.0 and this is for Spark 1.6.2, but there is only little
-difference.
+This is a procedure for Spark 1.6.2.
 
 ## 1. (prerequisite) Maven
 
@@ -41,9 +38,10 @@ Download (Use 3.3.9 now).
 
 ## 3. Snappy-Java
 
-Snappy (and its Java binding) is a data-marshaller used in Spark.
-Snappy does not include a binary for Linux/SPARCV9, and it is
-necessary to cross-compile it.
+Snappy (and its Java binding) is a data-marshaller used in Spark.  A
+distribution of Snappy includes binaries for many OS/processors
+combinations but lacks for Linux/SPARCV9, and it is necessary to
+cross-compile it.
 
 Set fakes for cross-compiling by Fujitsu fcc/FCC compilers.
 
@@ -69,8 +67,8 @@ in the top directory in the Spark source.
     $ wget https://raw.githubusercontent.com/pf-aics-riken/spark-k/master/snappy-java.patch.txt
     $ git apply -v snappy-java.patch.txt
 
-The patch changes the Makefile for a library "Linux" and "sparcv9".
-It also fixes the necessary version of the Snappy source.
+The patch changes the Makefile for a library for "Linux" and
+"sparcv9".  It also fixes the necessary version of the Snappy source.
 
 Edit the version file to fake the version is "1.1.2.1".
 
@@ -87,10 +85,10 @@ directory where the target file is visible:
 
     $ mvn install:install-file -Dfile=target/snappy-java-1.1.2.1.jar -DgroupId=org.xerial.snappy -DartifactId=snappy-java -Dversion=1.1.2.1 -Dpackaging=jar -DgeneratePom=true
 
-> (2016-07-21) The version of snappy is not the latest, but one
-specified in the patch.  The optimization is changed from -O2 to -O,
-in the currently installed one.  It is because it hits an assertion
-error when compiled with -O2.
+> (2016-07-21) The version of snappy used in this build is not the
+latest, but one specified in the patch.  It needs to be changed from
+-O2 to -O of the optimization option.  It hits an assertion error when
+compiled with -O2.
 
 ## 4. Apache Spark
 
@@ -118,9 +116,9 @@ Build Spark.
 
 It will take long time about an hour with a lot of downloading.
 
-Check if Snappy-Java is packaged properly (the compiled one is in the
-package).  The binary "native/Linux/sparcv9" is not included in the
-original distribution of Snappy-Java.
+Check if Snappy-Java is packaged properly (the one compiled abobe is
+actually in the package).  The binary "native/Linux/sparcv9" is not
+included in the original distribution of Snappy-Java.
 
     $ jar tvf dist/lib/spark-assembly-1.6.2-hadoop2.2.0.jar | grep sparcv9
     |     0 Tue Jul 19 16:13:06 JST 2016 org/xerial/snappy/native/Linux/sparcv9/

@@ -2,8 +2,8 @@
 
 # Using Apache Spark on K
 
-This package provides installation documentation and utility scripts
-for running [Apache Spark](http://spark.apache.org/) on [K
+This package provides installation document and utility scripts for
+running [Apache Spark](http://spark.apache.org/) on [K
 Computer](http://www.aics.riken.jp/en/k-computer/about/).  It includes
 simple examples.
 
@@ -40,5 +40,5 @@ For procedures to build and install, see [docs](docs).
 
 ## More Information
 
-* For general information using Spark on K, see [Basics in
-docs](docs/BASICS.md).
+* For background information using K, but not very specific to Spark,
+see [Basics in docs](docs/BASICS.md).

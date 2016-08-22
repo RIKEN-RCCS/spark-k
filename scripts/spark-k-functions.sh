@@ -79,4 +79,6 @@ spark_k_stop_all() {
 
 spark_k_clean() {
     rm -f ${k_settings_file} ${k_nodes_file} ${k_worker_nodes_file}
+    user=`id -un`
+    mpiexec /work/system/bin/msh rm -r "/tmp/hsperfdata_$user"
 }

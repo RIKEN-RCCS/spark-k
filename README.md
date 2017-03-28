@@ -1,5 +1,3 @@
-<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
-
 # Using Apache Spark on K
 
 This package provides installation document and utility scripts for

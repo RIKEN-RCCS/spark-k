@@ -1,5 +1,3 @@
-<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
-
 # Build R
 
 ## Note

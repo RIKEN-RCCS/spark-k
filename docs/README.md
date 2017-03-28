@@ -1,5 +1,3 @@
-<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
-
 # Build and Install
 
 This describes procedures building Spark and the R language on K.

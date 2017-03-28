@@ -1,5 +1,3 @@
-<!-- -*-Mode: Fundamental; Coding: us-ascii;-*- -->
-
 # Running Spark on K
 ==================
 
